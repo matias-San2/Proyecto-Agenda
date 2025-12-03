@@ -1,13 +1,28 @@
 service: aws-cognito-jwt-login
 frameworkVersion: '3'
 
+plugins:
+  - serverless-scriptable-plugin
+
+custom:
+  brandingBucket: ${self:service}-${self:provider.stage}-assets
+  scriptHooks:
+    after:deploy:finalize: node scripts/run-seed.js
+
+layers:
+  AwsSdkV3Layer:
+    path: layers/aws-sdk-v3
+    name: ${self:service}-aws-sdk-v3
+    compatibleRuntimes:
+      - nodejs20.x
+
 provider:
   name: aws
   runtime: nodejs20.x
   region: ${env:AWS_REGION, 'us-east-1'}
   stage: ${opt:stage, 'dev'}
   
-  role: ${env:AWS_ROLE, 'arn:aws:iam::837538831487:role/LabRole'}
+  
   
   tags:
     Project: HospitalPadreHurtado
@@ -31,6 +46,8 @@ provider:
     DB_BOX_INSTRUMENTO: ${self:service}-${sls:stage}-box-instrumento
     DB_NOTIFICACION: ${self:service}-${sls:stage}-notificacion
     STAGE: ${sls:stage}
+    BRANDING_BUCKET: ${self:service}-${self:provider.stage}-assets
+    ROLES_BASE_TABLE: ${self:service}-${sls:stage}-roles-base
     
   logs:
     httpApi: true
@@ -107,6 +124,13 @@ provider:
         - dynamodb:Scan
       Resource:
         - Fn::GetAtt: [PermissionsTable, Arn]
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+        - s3:DeleteObject
+      Resource:
+        - Fn::Sub: arn:aws:s3:::${self:service}-${self:provider.stage}-assets/*
 
     - Effect: Allow
       Action:
@@ -149,10 +173,51 @@ provider:
         - Fn::GetAtt: [NotificacionTable, Arn]
         - Fn::Sub: '${NotificacionTable.Arn}/index/*'
 
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - Fn::GetAtt: [BaseRolesTable, Arn]
+
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:DeleteItem
+        - dynamodb:Scan
+      Resource:
+        - Fn::GetAtt: [UserRolesTable, Arn]
+        - Fn::Sub: '${UserRolesTable.Arn}/index/*'
+        - Fn::GetAtt: [ParametersTable, Arn]
+        - Fn::Sub: '${ParametersTable.Arn}/index/*'
+
+    - Effect: Allow
+      Action:
+        - cognito-idp:ListUsers
+        - cognito-idp:AdminCreateUser
+        - cognito-idp:AdminSetUserPassword
+        - cognito-idp:AdminUpdateUserAttributes
+        - cognito-idp:AdminGetUser
+        - cognito-idp:AdminDeleteUser
+      Resource:
+        - Fn::Sub: arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${CognitoUserPool}
+
+    - Effect: Allow
+      Action:
+        - s3:ListBucket
+        - s3:DeleteObject
+      Resource:
+        - Fn::Sub: arn:aws:s3:::${self:service}-${self:provider.stage}-assets
+        - Fn::Sub: arn:aws:s3:::${self:service}-${self:provider.stage}-assets/*
+
 functions:
   # === HEALTH CHECK ===
   health:
     handler: src/handlers/health.check
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
     events:
       - httpApi:
           method: GET
@@ -162,6 +227,8 @@ functions:
 
   chaosTest:
     handler: src/handlers/chaos.run
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
     events:
       - httpApi:
           method: GET
@@ -171,6 +238,8 @@ functions:
 
   simulateLatency:
     handler: src/handlers/chaos/latencyChaos.simulate
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
     events:
       - httpApi:
           method: GET
@@ -180,6 +249,8 @@ functions:
   # === FUNCIONES DE AUTENTICACIÓN ===
   login:
     handler: src/handlers/login/login.login
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
     events:
       - httpApi:
           method: POST
@@ -187,8 +258,41 @@ functions:
     timeout: 30
     description: User authentication endpoint
 
+  onboardingCreateAdmin:
+    handler: src/handlers/admin/onboarding.createAdmin
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
+    events:
+      - httpApi:
+          method: POST
+          path: /admin/onboarding/create-admin
+    timeout: 60
+    description: Endpoint to create the initial admin user and company
+
+  deleteTenant:
+    handler: src/handlers/admin/deleteTenant.deleteTenant
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
+    description: Delete a tenant (empresa) and all associated data
+    timeout: 30
+    events:
+      - httpApi:
+          method: DELETE
+          path: /admin/tenant/{empresaId}
+          authorizer:
+            name: cognitoJwt
+
+  seedRoles:
+    handler: src/handlers/admin/seedRoles.run
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
+    description: Seed global base roles into DynamoDB
+    timeout: 20
+
   refresh:
     handler: src/handlers/login/refresh.refresh
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
     events:
       - httpApi:
           method: POST
@@ -198,6 +302,8 @@ functions:
 
   me:
     handler: src/handlers/login/me.me
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
     events:
       - httpApi:
           method: GET
@@ -210,6 +316,8 @@ functions:
   # === FUNCIONES DE PERMISOS ===
   getMyPermissions:
     handler: src/handlers/permissions/permissions.getMyPermissions
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
     events:
       - httpApi:
           method: GET
@@ -221,6 +329,8 @@ functions:
 
   checkPermission:
     handler: src/handlers/permissions/permissions.checkPermission
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
     events:
       - httpApi:
           method: POST
@@ -232,6 +342,8 @@ functions:
 
   assignRole:
     handler: src/handlers/permissions/permissions.assignRole
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
     events:
       - httpApi:
           method: POST
@@ -243,6 +355,8 @@ functions:
 
   removeRole:
     handler: src/handlers/permissions/permissions.removeRole
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
     events:
       - httpApi:
           method: DELETE
@@ -252,6 +366,8 @@ functions:
 
   listAvailablePermissions:
     handler: src/handlers/permissions/permissions.listAvailablePermissions
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
     events:
       - httpApi:
           method: GET
@@ -263,6 +379,8 @@ functions:
 
   listUsersWithRoles:
     handler: src/handlers/permissions/permissions.listUsersWithRoles
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
     events:
       - httpApi:
           method: GET
@@ -273,6 +391,8 @@ functions:
   # === FUNCIONES DE PERSONALIZACIÓN ===
   getPersonalization:
     handler: src/handlers/personalization/personalization.getPersonalization
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
     events:
       - httpApi:
           method: GET
@@ -284,16 +404,32 @@ functions:
 
   setPersonalization:
     handler: src/handlers/personalization/personalization.setPersonalization
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
     events:
       - httpApi:
           method: POST
           path: /personalization
           authorizer:
             name: cognitoJwt
+  uploadBrandingAsset:
+    handler: src/handlers/personalization/personalization.uploadBrandingAsset
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
+    timeout: 30
+    description: Upload branding assets for a company
+    events:
+      - httpApi:
+          method: POST
+          path: /personalization/branding/upload
+          authorizer:
+            name: cognitoJwt
   
   # === FUNCIONES DE COMUNICACIÓN DESACOPLADA ===
   handlePersonalizationEvents:
     handler: src/handlers/events.handlePersonalizationEvents
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
     events:
       - sqs:
           arn:
@@ -303,6 +439,8 @@ functions:
 
   handleSystemNotifications:
     handler: src/handlers/events.handleSystemNotifications
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
     events:
       - sqs:
           arn:
@@ -313,6 +451,8 @@ functions:
   # === FUNCIONES DE LOGS ===
   getActivityLogs:
     handler: src/handlers/logs.getActivityLogs
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
     events:
       - httpApi:
           method: GET
@@ -322,6 +462,8 @@ functions:
 
   getActivityStats:
     handler: src/handlers/logs.getActivityStats
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
     events:
       - httpApi:
           method: GET
@@ -332,6 +474,8 @@ functions:
   # === FUNCIONES DB ===
   dbProxy:
     handler: src/handlers/dbProxy.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
     events:
       - httpApi:
           path: /db/{proxy+}
@@ -341,84 +485,138 @@ functions:
   
   obtenerPasillos:
     handler: src/handlers/db/obtenerPasillos.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
 
   obtenerBoxes:
     handler: src/handlers/db/obtenerBoxes.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
 
   obtenerAgendaPorFecha:
     handler: src/handlers/db/obtenerAgendaPorFecha.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
 
   obtenerEspecialidades:
     handler: src/handlers/db/obtenerEspecialidades.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
 
   obtenerMedicos:
     handler: src/handlers/db/obtenerMedicos.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
 
   obtenerAgendaPorBox:
     handler: src/handlers/db/obtenerAgendaPorBox.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
   
   obtenerAgendaPorMedico:
     handler: src/handlers/db/obtenerAgendaPorMedico.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
   
   obtenerAgendaPorId:
     handler: src/handlers/db/obtenerAgendaPorId.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
 
   verificarConflictoBox:
     handler: src/handlers/db/verificarConflictoBox.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
   
   verificarConflictoMedico:
     handler: src/handlers/db/verificarConflictoMedico.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
     
   obtenerEstadoNoAtendido:
     handler: src/handlers/db/obtenerEstadoNoAtendido.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
   
   insertarAgenda:
     handler: src/handlers/db/insertarAgenda.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
 
   actualizarEstadoAgenda:
     handler: src/handlers/db/actualizarEstadoAgenda.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
 
   obtenerInstrumentosPorBox:
     handler: src/handlers/db/obtenerInstrumentosPorBox.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
 
   obtenerBoxYPasillo:
     handler: src/handlers/db/obtenerBoxYPasillo.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
   
   obtenerAgendaPorBoxYFecha:
     handler: src/handlers/db/obtenerAgendaPorBoxYFecha.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
 
   obtenerNotificaciones:
     handler: src/handlers/db/obtenerNotificaciones.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
 
   obtenerMedicoNombre:
     handler: src/handlers/db/obtenerMedicoNombre.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
 
   obtenerTotalConsultas:
     handler: src/handlers/db/obtenerTotalConsultas.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
   
   obtenerBoxesDisponibles:
     handler: src/handlers/db/obtenerBoxesDisponibles.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
   
   obtenerEspecialidadMasDemandada:
     handler: src/handlers/db/obtenerEspecialidadMasDemandada.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
 
   obtenerConsultasPorEspecialidad:
     handler: src/handlers/db/obtenerConsultasPorEspecialidad.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
   
   obtenerConsultasPorDia:
     handler: src/handlers/db/obtenerConsultasPorDia.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
   
   obtenerRendimientoMedicos:
     handler: src/handlers/db/obtenerRendimientoMedicos.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
 
   obtenerMedicosPorEspecialidades:
     handler: src/handlers/db/obtenerMedicosPorEspecialidades.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
   
   obtenerConsultasEnCurso:
     handler: src/handlers/db/obtenerConsultasEnCurso.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
   
   eliminarAgenda:
     handler: src/handlers/db/eliminarAgenda.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
 
 # Plugins comentados - no necesarios para deployment
 # plugins:
@@ -427,13 +625,23 @@ functions:
 package:
   individually: true
   patterns:
+    - 'src/**'
+    - 'package.json'
     - '!node_modules/**'
+    - '!package-lock.json'
     - '!**/*.md'
-    - '!**/*.test.*'
+    - '!test/**'
+    - '!tests/**'
+    - '!example/**'
+    - '!examples/**'
+    - '!docs/**'
+    - '!coverage/**'
+    - '!scripts/**'
+    - '!*.test.js'
     - '!.git/**'
     - '!.github/**'
-    - '!coverage/**'
     - '!.vscode/**'
+
 
 resources:
   Resources:
@@ -447,6 +655,8 @@ resources:
           - AttributeName: user_email
             AttributeType: S
           - AttributeName: role
+            AttributeType: S
+          - AttributeName: empresaId
             AttributeType: S
         KeySchema:
           - AttributeName: user_email
@@ -462,6 +672,46 @@ resources:
           - IndexName: RoleIndex
             KeySchema:
               - AttributeName: role
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: empresaId-index
+            KeySchema:
+              - AttributeName: empresaId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    BaseRolesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${sls:stage}-roles-base
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: role_key
+            AttributeType: S
+          - AttributeName: role
+            AttributeType: S
+          - AttributeName: empresaId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: role_key
+            KeyType: HASH
+        Tags:
+          - Key: Environment
+            Value: ${sls:stage}
+          - Key: Project
+            Value: HospitalPadreHurtado
+        GlobalSecondaryIndexes:
+          - IndexName: RoleIndex
+            KeySchema:
+              - AttributeName: role
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: empresaId-index
+            KeySchema:
+              - AttributeName: empresaId
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
@@ -495,6 +745,8 @@ resources:
             AttributeType: S
           - AttributeName: parameter_key
             AttributeType: S
+          - AttributeName: empresaId
+            AttributeType: S
         KeySchema:
           - AttributeName: user_sub
             KeyType: HASH
@@ -507,6 +759,13 @@ resources:
             Value: ${sls:stage}
           - Key: Project
             Value: HospitalPadreHurtado
+        GlobalSecondaryIndexes:
+          - IndexName: empresaId-index
+            KeySchema:
+              - AttributeName: empresaId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
 
     ActivityLogsTable:
       Type: AWS::DynamoDB::Table
@@ -825,6 +1084,24 @@ resources:
       Properties:
         TopicName: ${self:service}-${sls:stage}-notifications
         DisplayName: "Notificaciones del sistema"
+    BrandingAssetsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:service}-${self:provider.stage}-assets
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+              AllowedHeaders:
+                - '*'
+              MaxAge: 3600
+        OwnershipControls:
+          Rules:
+            - ObjectOwnership: BucketOwnerEnforced
 
   Outputs:
     UserPoolId:

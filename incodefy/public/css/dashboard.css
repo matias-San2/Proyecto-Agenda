@@ -86,6 +86,20 @@ body {
     margin-bottom: 0.5rem;
     position: relative;
     z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.header-section .brand-logo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    border-radius: 12px;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    flex-shrink: 0;
 }
 
 .header-section p {
@@ -560,6 +574,15 @@ body {
 }
 
 /* Mejoras en los iconos */
+.dashboard-filter-section img.icon,
+.dashboard-kpi-title img.icon,
+.dashboard-chart-title img.icon {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
 .dashboard-kpi-title i,
 .dashboard-chart-title i {
     color: var(--primary-color);

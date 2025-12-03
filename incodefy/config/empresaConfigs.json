@@ -1,0 +1,11 @@
+{
+  "HOSPITAL_01": {
+    "themeKey": "hospital"
+  },
+  "HOTEL_ABC": {
+    "themeKey": "hotel"
+  },
+  "DEPORTE_XYZ": {
+    "themeKey": "deporte"
+  }
+}

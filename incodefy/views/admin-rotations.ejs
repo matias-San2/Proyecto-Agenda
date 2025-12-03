@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= t('admin_rotations.title', 'Gestión de Rotaciones') %></title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2><%= t('admin_rotations.title', 'Gestión de Rotaciones') %></h2>
+        
+        <form id="assign-role-form">
+            <h2><%= t('admin_rotations.form_title', 'Asignar Rol a Usuario') %></h2>
+            <div class="form-group">
+                <label for="user_email">Email del Usuario</label>
+                <input type="email" class="form-control" id="user_email" name="user_email" required>
+            </div>
+            <div class="form-group">
+                <label for="user_role"><%= t('admin_rotations.role_label', 'Rol') %></label>
+                <select class="form-control" id="user_role" name="user_role">
+                    <% if (theme && theme.roles) { %>
+                        <% Object.entries(theme.roles).forEach(([key, displayText]) => { %>
+                            <option value="<%= key %>"><%= displayText %></option>
+                        <% }) %>
+                    <% } %>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary"><%= t('admin_rotations.assign_button', 'Asignar Rol') %></button>
+        </form>
+    </div>
+
+    <script src="/js/apiClient.js"></script> 
+    <script>
+        document.getElementById('assign-role-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const email = event.target.user_email.value;
+            const role = event.target.user_role.value;
+
+            if (!email || !role) {
+                alert('Por favor, complete todos los campos.');
+                return;
+            }
+
+            try {
+                await apiClient.assignUserRole(email, role);
+                alert('Rol asignado correctamente.');
+                event.target.reset();
+            } catch (error) {
+                console.error('Error asignando rol:', error);
+                alert('Error: ' + (error.response ? error.response.data.message : error.message));
+            }
+        });
+    </script>
+</body>
+</html>

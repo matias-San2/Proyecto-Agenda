@@ -110,6 +110,12 @@ body {
     color: white;
 }
 
+.section-icon img.icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
 .section-icon i {
     margin-top: 3px;
 }
@@ -180,6 +186,13 @@ body {
     margin-bottom: 0.75rem;
 }
 
+.option-card img.icon {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+    margin-bottom: 0.75rem;
+}
+
 .option-card span {
     font-size: 1.1rem;
     font-weight: 600;
@@ -234,9 +247,9 @@ body {
         padding: 3rem!important;
     }
 
-    .option-card img {
-        max-width: 100px!important;
-        max-height: 100px!important;
+    .option-card img.icon {
+        width: 60px!important;
+        height: 60px!important;
     }
 
     .option-card i {

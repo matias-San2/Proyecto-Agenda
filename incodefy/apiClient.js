@@ -228,6 +228,22 @@ class ApiClient {
     });
     return response.data;
   }
+
+  // ============ ADMIN ============
+  async assignUserRole(email, role) {
+    const response = await this.client.post('/admin/assign-role', {
+      user_email: email,
+      role: role
+    });
+    return response.data;
+  }
+
+  async removeUserRole(email) {
+    const response = await this.client.delete('/admin/remove-role', {
+      data: { user_email: email }
+    });
+    return response.data;
+  }
 }
 
 module.exports = ApiClient;

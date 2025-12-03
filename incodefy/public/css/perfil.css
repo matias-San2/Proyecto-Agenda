@@ -113,6 +113,81 @@ body {
   color: var(--text-color);
 }
 
+.theme-selection__help {
+  color: var(--secondary-text-color);
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.theme-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.theme-card {
+  flex: 1 1 220px;
+  cursor: pointer;
+  position: relative;
+  border-radius: 14px;
+}
+
+.theme-card input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.theme-card__body {
+  border: 2px solid var(--border-color);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  background: var(--card-background);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  min-height: 135px;
+}
+
+.theme-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+
+.theme-card__title {
+  font-weight: 600;
+  color: var(--text-color);
+  font-size: 1.05rem;
+}
+
+.theme-card__badge {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  color: var(--secondary-text-color);
+}
+
+.theme-card__description {
+  margin: 0;
+  color: var(--secondary-text-color);
+  font-size: 0.92rem;
+  line-height: 1.3;
+}
+
+.theme-card input:checked + .theme-card__body {
+  border-color: var(--primary-color);
+  box-shadow: 0 8px 24px rgba(26, 60, 124, 0.18);
+}
+
+.theme-card:hover .theme-card__body {
+  border-color: var(--primary-color-light);
+  transform: translateY(-2px);
+}
+
 .form-select {
   width: 100%;
   padding: 0.75rem;
@@ -416,6 +491,9 @@ body[data-theme="dark"] .message.error {
 /* Responsive */
 @media (max-width: 768px) {
   .radio-group, .color-group {
+    flex-direction: column;
+  }
+  .theme-options {
     flex-direction: column;
   }
   

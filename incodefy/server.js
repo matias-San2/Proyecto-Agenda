@@ -3,10 +3,11 @@ const express = require('express');
 const path = require('path');
 const db = require('./db');
 const fetch = require('node-fetch');
+const methodOverride = require('method-override');
 
 // === i18next configuración para internacionalización ===
-const i18next = require('./i18n');
-const i18nextHttpMiddleware = require('i18next-http-middleware');
+// const i18next = require('./i18n');
+// const i18nextHttpMiddleware = require('i18next-http-middleware');
 const cookieParser = require('cookie-parser');
 
 const app = express();
@@ -21,10 +22,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(methodOverride('_method'));
 
 // === Configuración de Sesión ===
 const session = require('express-session');
 const flash = require('connect-flash');
+const themeMiddleware = require('./middleware/themeMiddleware');
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'clave-secreta',
@@ -35,12 +38,15 @@ app.use(session({
   }
 }));
 
+app.use(themeMiddleware); 
+
 // === Integración de i18next (Internacionalización) ===
 // 1. Añade las funciones de i18next (req.t, req.i18n) a cada petición.
 //    Debe ir DESPUÉS de la sesión para poder persistir el idioma.
-app.use(i18nextHttpMiddleware.handle(i18next));
+// app.use(i18nextHttpMiddleware.handle(i18next));
 
 // 2. Middleware para cambiar el idioma basado en la sesión y exponer la función `t` a las vistas.
+/*
 app.use((req, res, next) => {
   // Si el usuario tiene un idioma guardado en la sesión, lo usamos.
   if (req.session && req.session.language && req.i18n?.language !== req.session.language) {
@@ -55,6 +61,7 @@ app.use((req, res, next) => {
   res.locals.i18n = { language: currentLang };
   next();
 });
+*/
 
 
 // === Middlewares de aplicación (dependen de sesión) ===
@@ -76,7 +83,7 @@ const checkPermission = require('./middleware/checkPermission');
 // === MIDDLEWARES GLOBALES DE PERSONALIZACIÓN ===
 // Estos se ejecutarán en todas las rutas que vengan después de ellos.
 app.use(personalizationMiddleware);
-app.use(setLanguage);
+//app.use(setLanguage);
 
 
 // === RUTAS PÚBLICAS (sin autenticación) ===
@@ -95,6 +102,12 @@ app.get('/', (req, res) => {
 // Auth routes (públicas)
 const authRoutes = require('./routes/auth');
 app.use('/', authRoutes);
+
+const setupRoutes = require('./routes/setup');
+app.use('/', setupRoutes);
+
+const adminTenantRoutes = require('./routes/adminTenant');
+app.use('/', adminTenantRoutes);
 
 // === RUTAS PROTEGIDAS (requieren autenticación) ===
 
@@ -163,13 +176,33 @@ app.use('/', requireAuth, notificacionesRoutes);
 const calendarioRouter = require('./routes/calendario');
 app.use('/', requireAuth, calendarioRouter);
 
+// Admin routes
+const adminRoutes = require('./routes/admin');
+app.use('/admin', requireAuth, adminRoutes);
+
 // Perfil
 app.get('/perfil', requireAuth, (req, res) => {
   res.render('perfil', {
     currentPath: req.path,
-    personalization: req.session.user?.personalization || {},
-    idToken: req.session.user?.idToken,
-    language: req.session.language || req.language // Usar idioma de sesión
+    personalization: req.session.personalization || req.session.user?.personalization || {},
+    idToken: req.session.user?.idToken
+  });
+});
+
+app.post('/perfil', requireAuth, (req, res) => {
+  if (req.body.lang) {
+    req.session.lang = req.body.lang;
+  }
+
+  if (req.session.user && req.session.user.isAdmin && req.body.themeKey) {
+    req.session.themeKey = req.body.themeKey;
+  }
+
+  req.session.save(err => {
+    if (err) {
+      console.error('Error al guardar la sesión para /perfil:', err);
+    }
+    res.redirect('/perfil');
   });
 });
 
@@ -211,25 +244,30 @@ app.post('/api/personalization', requireAuth, async (req, res) => {
       // Actualizar personalización en sesión
       if (result.final_parameters) {
         req.session.user.personalization = result.final_parameters;
+        req.session.personalization = result.final_parameters;
+
+        if (result.final_parameters.themeKey) {
+          req.session.themeKey = result.final_parameters.themeKey;
+        }
 
         // Manejo adicional de idioma (locale.language)
         const newLang = result.final_parameters['locale.language'];
         if (newLang && typeof newLang === 'string') {
           req.session.language = newLang;
 
-          if (req.i18n?.language !== newLang) {
-            try {
-              req.i18n.changeLanguage(newLang);
-            } catch (e) {
-              console.warn('⚠️ No se pudo cambiar idioma en i18n:', e.message);
-            }
-          }
+          // if (req.i18n?.language !== newLang) {
+          //   try {
+          //     req.i18n.changeLanguage(newLang);
+          //   } catch (e) {
+          //     console.warn('⚠️ No se pudo cambiar idioma en i18n:', e.message);
+          //   }
+          // }
 
           // Guardar cookie persistente en el navegador (30 días)
-          res.cookie('i18next', newLang, {
-            maxAge: 30 * 24 * 60 * 60 * 1000,
-            httpOnly: true
-          });
+          // res.cookie('i18next', newLang, {
+          //   maxAge: 30 * 24 * 60 * 60 * 1000,
+          //   httpOnly: true
+          // });
         }
       }
 
@@ -313,12 +351,31 @@ app.get('/test', (req, res) => {
   });
 });
 
-// Manejo de errores 404
-app.use((req, res) => {
-  res.status(404).render('error', { 
-    error: 'Página no encontrada',
-    message: `La ruta ${req.path} no existe`
-  });
+// Middleware global para detectar sesión inválida después de eliminar un tenant
+app.use(async (err, req, res, next) => {
+  try {
+    // Si la respuesta del backend indica usuario/empresa inexistente
+    const isInvalidTenant =
+      err?.status === 404 ||
+      err?.status === 410 ||
+      (err?.status === 401 && req.session?.user) ||
+      (typeof err?.message === 'string' &&
+        (err.message.includes('empresa') || err.message.includes('usuario')));
+
+    if (isInvalidTenant) {
+      console.warn("⚠ Sesión inválida detectada. Reiniciando...");
+
+      return req.session.destroy(() => {
+        res.redirect('/setup');
+      });
+    }
+
+    // Si no es un error relacionado a tenant → pasarlo al siguiente handler
+    next(err);
+  } catch (error) {
+    console.error("Middleware error:", error);
+    next(err);
+  }
 });
 
 // Manejo de errores generales
@@ -327,6 +384,14 @@ app.use((err, req, res, next) => {
   res.status(500).render('error', { 
     error: 'Error interno del servidor',
     message: 'Ha ocurrido un error inesperado'
+  });
+});
+
+// Manejo de errores 404
+app.use((req, res) => {
+  res.status(404).render('error', { 
+    error: 'Página no encontrada',
+    message: `La ruta ${req.path} no existe`
   });
 });
 

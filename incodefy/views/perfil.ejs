@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="<%= lng || 'es' %>">
+<html lang="<%= lang || 'es' %>">
 <head>
   <meta charset="UTF-8">
   <title><%= t('profile.title') %></title>
@@ -121,82 +121,41 @@
                   <div class="form-group">
                     <label><%= t('profile.language.interface_language') %></label>
                     <select name="locale.language" class="form-select">
-                      <option value="es" <%= (!personalization['locale.language'] || personalization['locale.language'] === 'es') ? 'selected' : '' %>>
-                        🇪🇸 <%= t('languages.es') %>
+                      <option value="es" <%= ((lang || 'es') === 'es') ? 'selected' : '' %>>
+                        🇪🇸 <%= t('languages.es', 'Español') %>
                       </option>
-                      <option value="en" <%= personalization['locale.language'] === 'en' ? 'selected' : '' %>>
-                        🇺🇸 <%= t('languages.en') %>
-                      </option>
-                      <option value="ar" <%= personalization['locale.language'] === 'ar' ? 'selected' : '' %>>
-                        ar <%= t('languages.ar') %>
-                      </option>
-                      <option value="bn" <%= personalization['locale.language'] === 'bn' ? 'selected' : '' %>>
-                        bn <%= t('languages.bn') %>
-                      </option>
-                      <option value="de" <%= personalization['locale.language'] === 'de' ? 'selected' : '' %>>
-                        de <%= t('languages.de') %>
-                      </option>
-                      <option value="fa" <%= personalization['locale.language'] === 'fa' ? 'selected' : '' %>>
-                        fa <%= t('languages.fa') %>
-                      </option>
-                      <option value="fr" <%= personalization['locale.language'] === 'fr' ? 'selected' : '' %>>
-                        fr <%= t('languages.fr') %>
-                      </option>
-                      <option value="hi" <%= personalization['locale.language'] === 'hi' ? 'selected' : '' %>>
-                        hi <%= t('languages.hi') %>
-                      </option>
-                      <option value="it" <%= personalization['locale.language'] === 'it' ? 'selected' : '' %>>
-                        it <%= t('languages.it') %>
-                      </option>
-                      <option value="ja" <%= personalization['locale.language'] === 'ja' ? 'selected' : '' %>>
-                        ja <%= t('languages.ja') %>
-                      </option>
-                      <option value="jv" <%= personalization['locale.language'] === 'jv' ? 'selected' : '' %>>
-                        jv <%= t('languages.jv') %>
-                      </option>
-                      <option value="ko" <%= personalization['locale.language'] === 'ko' ? 'selected' : '' %>>
-                        ko <%= t('languages.ko') %>
-                      </option>
-                      <option value="mr" <%= personalization['locale.language'] === 'mr' ? 'selected' : '' %>>
-                        mr <%= t('languages.mr') %>
-                      </option>
-                      <option value="nl" <%= personalization['locale.language'] === 'nl' ? 'selected' : '' %>>
-                        nl <%= t('languages.nl') %>
-                      </option>
-                      <option value="pa" <%= personalization['locale.language'] === 'pa' ? 'selected' : '' %>>
-                        pa <%= t('languages.pa') %>
-                      </option>
-                      <option value="pl" <%= personalization['locale.language'] === 'pl' ? 'selected' : '' %>>
-                        pl <%= t('languages.pl') %>
-                      </option>
-                      <option value="pt" <%= personalization['locale.language'] === 'pt' ? 'selected' : '' %>>
-                        pt <%= t('languages.pt') %>
-                      </option>
-                      <option value="ru" <%= personalization['locale.language'] === 'ru' ? 'selected' : '' %>>
-                        ru <%= t('languages.ru') %>
-                      </option>
-                      <option value="ta" <%= personalization['locale.language'] === 'ta' ? 'selected' : '' %>>
-                        ta <%= t('languages.ta') %>
-                      </option>
-                      <option value="te" <%= personalization['locale.language'] === 'te' ? 'selected' : '' %>>
-                        te <%= t('languages.te') %>
-                      </option>
-                      <option value="th" <%= personalization['locale.language'] === 'th' ? 'selected' : '' %>>
-                        🇺🇸 <%= t('languages.th') %>
-                      </option>
-                      <option value="tr" <%= personalization['locale.language'] === 'tr' ? 'selected' : '' %>>
-                        tr <%= t('languages.tr') %>
-                      </option>
-                      <option value="ur" <%= personalization['locale.language'] === 'ur' ? 'selected' : '' %>>
-                        🇺r <%= t('languages.ur') %>
-                      </option>
-                      <option value="vi" <%= personalization['locale.language'] === 'vi' ? 'selected' : '' %>>
-                        vi <%= t('languages.vi') %>
-                      </option>
-                      <option value="zh" <%= personalization['locale.language'] === 'zh' ? 'selected' : '' %>>
-                        zh <%= t('languages.zh') %>
+                      <option value="en" <%= (lang === 'en') ? 'selected' : '' %>>
+                        🇺🇸 <%= t('languages.en', 'English') %>
                       </option>
                     </select>
+                  </div>
+                </div>
+
+                <% const currentThemeKey = locals.themeKey || 'hospital'; %>
+                <div class="form-section theme-selection">
+                  <h4><i class="fas fa-building"></i> Define el tema corporativo</h4>
+                  <p class="theme-selection__help">Elige el rubro que representa a tu empresa para ajustar textos, componentes y estilos generales.</p>
+                  <div class="theme-options">
+                    <% const themeOptions = [
+                      { key: 'hospital', title: 'Hospital', description: 'Interfaz con foco en pacientes, turnos y métricas médicas.' },
+                      { key: 'hotel', title: 'Hotel', description: 'Experiencia cálida enfocada en reservas y servicio al huésped.' },
+                      { key: 'deporte', title: 'Deporte', description: 'Visuales dinámicos pensados para centros deportivos y academias.' }
+                    ]; %>
+                    <% themeOptions.forEach(option => { %>
+                      <label class="theme-card">
+                        <input type="radio"
+                               name="themeKey"
+                               value="<%= option.key %>"
+                               <%= currentThemeKey === option.key ? 'checked' : '' %>>
+                        <div class="theme-card__body">
+                          <div class="theme-card__header">
+                            <span class="theme-card__title"><%= option.title %></span>
+                            <span class="theme-card__badge"><%= option.key %></span>
+                          </div>
+                          <p class="theme-card__description"><%= option.description %></p>
+                        </div>
+                      </label>
+                    <% }) %>
                   </div>
                 </div>
 
@@ -212,7 +171,43 @@
                   <i class="fas fa-spinner fa-spin"></i> <%= t('profile.messages.saving') %>
                 </div>
                 <div id="message" class="message"></div>
+                
               </form>
+              <% if (user && user.isAdmin) { %>
+                <div class="form-section">
+                  <h4><i class="fas fa-cloud-upload-alt"></i> Branding corporativo</h4>
+                  <p class="text-muted">Sube tus logos e íconos para personalizar la experiencia visual.</p>
+
+                  <form action="/perfil/branding" method="POST" enctype="multipart/form-data" class="mb-3">
+                    <label class="form-label fw-semibold">Logo de la empresa</label>
+                    <input type="hidden" name="field" value="branding.logo">
+                    <input type="file" name="file" accept=".png,.jpg,.jpeg,.svg" class="form-control mb-2" required>
+                    <button type="submit" class="btn btn-outline-primary btn-sm">Subir</button>
+                  </form>
+
+                  <form action="/perfil/branding" method="POST" enctype="multipart/form-data" class="mb-3">
+                    <label class="form-label fw-semibold">Ícono de Agenda</label>
+                    <input type="hidden" name="field" value="branding.icons.agenda">
+                    <input type="file" name="file" accept=".png,.jpg,.jpeg,.svg" class="form-control mb-2" required>
+                    <button type="submit" class="btn btn-outline-primary btn-sm">Subir</button>
+                  </form>
+
+                  <form action="/perfil/branding" method="POST" enctype="multipart/form-data" class="mb-3">
+                    <label class="form-label fw-semibold">Ícono de Box</label>
+                    <input type="hidden" name="field" value="branding.icons.box">
+                    <input type="file" name="file" accept=".png,.jpg,.jpeg,.svg" class="form-control mb-2" required>
+                    <button type="submit" class="btn btn-outline-primary btn-sm">Subir</button>
+                  </form>
+
+                  <form action="/perfil/branding" method="POST" enctype="multipart/form-data">
+                    <label class="form-label fw-semibold">Ícono de Sala</label>
+                    <input type="hidden" name="field" value="branding.icons.room">
+                    <input type="file" name="file" accept=".png,.jpg,.jpeg,.svg" class="form-control mb-2" required>
+                    <button type="submit" class="btn btn-outline-primary btn-sm">Subir</button>
+                  </form>
+                </div>
+              <% } %>
+
             </div>
           </div>
         </div>
@@ -270,13 +265,38 @@
 
     // El botón de vista previa ya no es necesario con este flujo, pero lo dejamos por si se reutiliza.
     // Puedes ocultarlo o eliminarlo del HTML si lo deseas.
-    document.getElementById('previewBtn').addEventListener('click', function() {
-        const messageDiv = document.getElementById('message');
-        messageDiv.innerHTML = `<i class="fas fa-info-circle"></i> <%= t('profile.messages.preview_disabled') %>`;
-        messageDiv.className = 'message info';
-        messageDiv.style.display = 'block';
-        setTimeout(() => { messageDiv.style.display = 'none'; }, 4000);
-    });
+ //   document.getElementById('previewBtn').addEventListener('click', function() {
+  //       const messageDiv = document.getElementById('message');
+   //      messageDiv.innerHTML = `<i class="fas fa-info-circle"></i> <%= t('profile.messages.preview_disabled') %>`;
+  //      messageDiv.className = 'message info';
+   //      messageDiv.style.display = 'block';
+  //       setTimeout(() => { messageDiv.style.display = 'none'; }, 4000);
+  //   });
 </script>
+<% if (user && (user.role === 'admin' || user.role === 'superadmin')) { %>
+  <div class="form-section mt-5">
+    <h4 class="text-danger"><i class="fas fa-exclamation-triangle"></i> Eliminar empresa</h4>
+    <p class="text-muted">
+      Esta acción eliminará <strong>toda la empresa (tenant)</strong>, incluyendo:
+    </p>
+    <ul>
+      <li>Todos los usuarios</li>
+      <li>Todos los roles y permisos</li>
+      <li>Todos los parámetros de personalización</li>
+      <li>Todos los archivos (branding, logos, íconos)</li>
+      <li>Todos los registros de catálogo asociados</li>
+    </ul>
+
+    <p class="text-danger fw-bold">
+      Esta acción es irreversible.
+    </p>
+
+    <form action="/admin/tenant/<%= personalization?.empresaId || user?.empresaId %>?_method=DELETE" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar toda la empresa? Esta acción no se puede deshacer.')">
+      <button class="btn btn-danger w-100 mt-2" type="submit">
+        <i class="fas fa-trash"></i> Eliminar empresa definitivamente
+      </button>
+    </form>
+  </div>
+<% } %>
 </body>
 </html>

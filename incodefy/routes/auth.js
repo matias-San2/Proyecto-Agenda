@@ -1,5 +1,8 @@
 // routes/auth.js
 require('dotenv').config();
+// solo probar vista luego borrar
+
+
 
 const express = require("express");
 const router = express.Router();
@@ -22,6 +25,8 @@ const PERSONALIZATION_ENDPOINT = process.env.PERSONALIZATION_ENDPOINT;
 
 const PERMISSIONS_URL = `${API_BASE_URL}${PERMISSIONS_ENDPOINT}`;
 const PERSONALIZATION_URL = `${API_BASE_URL}${PERSONALIZATION_ENDPOINT}`;
+const ONBOARDING_URL = `${API_BASE_URL}/admin/onboarding/create-admin`;
+const passwordSetupRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
 
 console.log('🔗 URLs configuradas:');
 console.log('   Permisos:', PERMISSIONS_URL);
@@ -154,8 +159,12 @@ router.post('/login', async (req, res) => {
       if (permissionsResponse.ok) {
         const permissionsData = await permissionsResponse.json();
         req.session.user.permissions = permissionsData.permissions || [];
+        req.session.user.role = permissionsData.role || 'user';
+        req.session.user.empresaId = permissionsData.empresaId || null;
         req.session.user.ui_config = permissionsData.ui_config || {};
         console.log('✅ Permisos obtenidos:', req.session.user.permissions);
+        console.log('✅ Rol obtenido:', req.session.user.role);
+        console.log('✅ Empresa ID obtenido:', req.session.user.empresaId);
       } else {
         console.log('⚠️ Error obteniendo permisos:', permissionsResponse.status);
       }
@@ -253,6 +262,9 @@ router.get('/profile', (req, res) => {
   });
 });
 
+router.get('/test-setup', (req, res) => {
+  res.render('setup/init');
+});
 // Exportar el router y la función de refresh
 module.exports = router;
 module.exports.refreshUserPersonalization = refreshUserPersonalization;

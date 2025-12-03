@@ -1,3 +1,5 @@
+<% const brandingSource = (typeof personalization !== 'undefined' && personalization) ? personalization : (locals && locals.personalization ? locals.personalization : null); %>
+<% const branding = (brandingSource && brandingSource.branding) ? brandingSource.branding : {}; %>
 <nav class="custom-navbar">
   <div class="navbar-toggle" onclick="toggleNavbar()" aria-label="Abrir menú de navegación">
     <i class="fas fa-bars"></i>
@@ -5,7 +7,7 @@
   
   <div class="navbar-title">
     <a class="logo" href="/">
-      <img src="/logos/logo_hospital.png" alt="Home">
+      <img src="<%= branding.logo || '/logos/logo_hospital.png' %>" class="brand-logo" alt="Home">
     </a>
   </div>
 
@@ -15,19 +17,19 @@
   <ul class="navbar-menu">
     <li>
       <a href="/dashboard" class="menu-link <%= currentPath === '/dashboard' ? 'active' : '' %>" data-tooltip="Dashboard">
-        <img src="/icons/dashboard.webp" alt="">
+        <img src="<%= (branding.icons && branding.icons.agenda) || '/icons/dashboard.webp' %>" class="icon" alt="">
         <span>Dashboard</span>
       </a>
     </li>
     <li>
       <a href="/agenda" class="menu-link <%= currentPath === '/agenda' ? 'active' : '' %>" data-tooltip="Agenda">
-        <img src="/icons/calendario.webp" alt="">
+        <img src="<%= (branding.icons && branding.icons.agenda) || '/icons/calendario.webp' %>" class="icon" alt="">
         <span>Agenda</span>
       </a>
     </li>
     <li>
       <a href="/box" class="menu-link <%= currentPath.startsWith('/box') ? 'active' : '' %>" data-tooltip="Box">
-        <img src="/icons/box.webp" alt="">
+        <img src="<%= (branding.icons && branding.icons.box) || '/icons/box.webp' %>" class="icon" alt="">
         <span>Box</span>
       </a>
     </li>

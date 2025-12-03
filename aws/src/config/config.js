@@ -24,7 +24,7 @@ module.exports = {
       },
       'locale.language': { 
         type: 'select',
-        options: process.env.LANGUAGES ? process.env.LANGUAGES.split(',') : ['es','en','pt','it','zh','hi','ar','bn','ru','ja','pa','de','jv','ko','fr','te','mr','tr','ta','vi','ur',nl,'pl','th','fa'],
+        options: process.env.LANGUAGES ? process.env.LANGUAGES.split(',') : ['es','en','pt','it','zh','hi','ar','bn','ru','ja','pa','de','jv','ko','fr','te','mr','tr','ta','vi','ur','nl','pl','th','fa'],
         default: 'es',
         name: 'Idioma'
       },
@@ -33,7 +33,14 @@ module.exports = {
         options: process.env.FONT_SIZES ? process.env.FONT_SIZES.split(',') : ['pequeno', 'mediano', 'grande'],
         default: 'mediano',
         name: 'Escala de fuente'
+      },
+      'themeKey': {
+        type: 'select',
+        options: ['hospital', 'hotel', 'deporte'],
+        default: 'hospital',
+        name: 'Tema/Rubro de empresa'
       }
+
     },
 
     // === Función de variantes de color centralizada ===

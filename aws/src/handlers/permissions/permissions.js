@@ -221,7 +221,7 @@ module.exports.getMyPermissions = async (event) => {
     const userPermissions = result.Item || { user_email: userEmail, role: "none", permissions: [] };
     const uiConfig = generateUIConfig(userPermissions.permissions || []);
 
-    return response(200, { ok: true, ...userPermissions, ui_config: uiConfig });
+    return response(200, { ok: true, ...userPermissions, ui_config: uiConfig, empresaId: userPermissions.empresaId || null });
 
   } catch (err) {
     dynamoBreaker.reportFailure();

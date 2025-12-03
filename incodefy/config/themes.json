@@ -1,0 +1,41 @@
+{
+  "hospital": {
+    "es": {
+      "resourceTypes": {
+        "sala": "Sala",
+        "medico": "Médico"
+      },
+      "roles": {
+        "admin": "Admin (Hospital)",
+        "medico": "Médico",
+        "enfermera": "Enfermera"
+      }
+    }
+  },
+  "hotel": {
+    "es": {
+      "resourceTypes": {
+        "sala": "Habitación",
+        "medico": "Conserje"
+      },
+      "roles": {
+        "admin": "Gerente de Hotel",
+        "medico": "Conserje Principal",
+        "enfermera": "Recepcionista"
+      }
+    }
+  },
+  "deporte": {
+    "es": {
+      "resourceTypes": {
+        "sala": "Cancha",
+        "medico": "Entrenador"
+      },
+      "roles": {
+        "admin": "Admin (Club)",
+        "medico": "Entrenador Jefe",
+        "enfermera": "Recepcionista Club"
+      }
+    }
+  }
+}

@@ -368,6 +368,14 @@ body {
   color: #dee2e6;
 }
 
+.no-resultados img.icon {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  margin-bottom: 15px;
+  opacity: 0.8;
+}
+
 .no-resultados h3 {
   margin-bottom: 10px;
   color: #495057;

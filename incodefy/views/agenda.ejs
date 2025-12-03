@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="<%= i18n.language %>">
+<html lang="<%= lang %>">
 <head>
   <meta charset="UTF-8">
   <title><%= t('agenda.title') %></title>
@@ -12,6 +12,9 @@
   <%- include('partials/personalization-styles') %>
 </head>
 <body data-theme="<%= (locals.personalization && personalization['theme.mode']) || 'light' %>">
+  <% const brandingSource = (typeof personalization !== 'undefined' && personalization) ? personalization : (locals && locals.personalization ? locals.personalization : null); %>
+  <% const branding = (brandingSource && brandingSource.branding) ? brandingSource.branding : {}; %>
+  <% const brandingIcons = (branding && branding.icons) ? branding.icons : {}; %>
   
   <!-- Toast Container -->
   <div class="toast-container">
@@ -45,7 +48,7 @@
             <div class="section data-section col-12 col-md-5">
               <div class="section-header">
                 <div class="section-icon">
-                  <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                  <img src="<%= brandingIcons.agenda || '/icons/calendario.webp' %>" class="icon" alt="Agenda">
                 </div>
                 <h2 class="section-title"><%= t('agenda.management.title') %></h2>
                 <p class="section-description"><%= t('agenda.management.description') %></p>
@@ -54,13 +57,13 @@
               <div class="row gy-4 justify-content-center">
                 <div class="col-12 col-sm-11 col-md-11 col-lg-6">
                   <a href="#" class="option-card" onclick="showDevToast(event)">
-                    <i class="fa-solid fa-boxes-stacked"></i>
+                    <img src="<%= brandingIcons.box || '/icons/box.webp' %>" class="icon" alt="Box">
                     <span><%= t('agenda.management.box') %></span>
                   </a>
                 </div>
                 <div class="col-12 col-sm-11 col-md-11 col-lg-6">
                   <a href="#" class="option-card" onclick="showDevToast(event)">
-                    <i class="fa-solid fa-user-doctor" aria-hidden="true"></i>
+                    <img src="<%= brandingIcons.room || '/icons/doctor.png' %>" class="icon" alt="Sala">
                     <span><%= t('agenda.management.doctor') %></span>
                   </a>
                 </div>

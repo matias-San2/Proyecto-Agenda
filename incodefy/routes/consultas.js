@@ -23,8 +23,7 @@ router.get('/en-curso', checkPermission('box.write'), (req, res) => {
   res.render('consultas_en_curso', { 
     currentPath: req.path,
     personalization: req.session.user?.personalization || {},
-    t: req.t,           // ← AGREGAR ESTO
-    i18n: req.i18n      // ← Y ESTO
+    t: req.t           // ← AGREGAR ESTO
   });
 });
 

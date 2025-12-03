@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="<%= i18n.language %>">
+<html lang="<%= lang %>">
+
 <head>
   <meta charset="UTF-8">
-  <title><%= t('common.error') %> - <%= error %></title>
+  <title><%= t('common.error') %> - <%= message %></title>
   <link rel="stylesheet" href="/css/login.css">
 </head>
 <body>
 <div class="wrapper">
   <div class="login-box">
-    <h2 class="error-title"><%= error %></h2>
+    <h2 class="error-title"><%= message %></h2>
     <p class="error-mensaje"><%= message %></p>
     <a href="/" class="btn volver"><%= t('common.back_to_home') %></a>
   </div>

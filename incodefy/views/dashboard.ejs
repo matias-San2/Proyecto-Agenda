@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="<%= i18n.language %>">
+<html lang="<%= lang %>">
 <head>
     <meta charset="UTF-8">
     <title><%= t('dashboard.title') %></title>
@@ -16,6 +16,9 @@
 </head>
 <!-- Se añade el atributo data-theme para que funcione el modo oscuro/claro -->
 <body data-theme="<%= (locals.personalization && personalization['theme.mode']) || 'light' %>">
+    <% const brandingSource = (typeof personalization !== 'undefined' && personalization) ? personalization : (locals && locals.personalization ? locals.personalization : null); %>
+    <% const branding = (brandingSource && brandingSource.branding) ? brandingSource.branding : {}; %>
+    <% const brandingIcons = (branding && branding.icons) ? branding.icons : {}; %>
     <div class="container-fluid">
         <div class="row">
             <%- include('navbar') %>
@@ -23,7 +26,7 @@
             <div class="main">
                 <div class="header-section">
                     <h1>
-                        <i class="fas fa-chart-line me-2 header-icon"></i>
+                        <img src="<%= branding.logo || '/logos/logo_hospital.png' %>" class="brand-logo me-2 header-icon" alt="Branding logo">
                         <%= t('dashboard.header') %>
                     </h1>
                     <p><%= t('dashboard.subheader') %></p>
@@ -38,7 +41,7 @@
                                 <div class="dropdown">
                                     <button class="btn btn-primary dropdown-toggle" type="button"
                                             data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
-                                        <i class="fas fa-calendar-alt me-2"></i><%= t('dashboard.filters.date_range') %>
+                                        <img src="<%= brandingIcons.agenda || '/icons/calendario.webp' %>" class="icon me-2" alt="Agenda icon"><%= t('dashboard.filters.date_range') %>
                                     </button>
                                     <div class="dropdown-menu">
                                         <div class="mb-3">
@@ -82,7 +85,7 @@
                                 <div class="dropdown">
                                     <button class="btn btn-primary dropdown-toggle" type="button"
                                             data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
-                                        <i class="fas fa-door-open me-2"></i><%= t('dashboard.filters.boxes') %>
+                                        <img src="<%= brandingIcons.box || '/icons/box.webp' %>" class="icon me-2" alt="Box icon"><%= t('dashboard.filters.boxes') %>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-scrollable p-0">
                                         <li class="dropdown-header-fixed p-2">
@@ -117,14 +120,14 @@
                 <div class="row gy-4 dashboard-kpi-container">
                     <div class="col-12 col-md-6 col-lg-3">
                         <div class="dashboard-kpi-card">
-                            <div class="dashboard-kpi-title"><i class="fas fa-chart-pie me-2"></i><%= t('dashboard.kpi.occupation') %></div>
+                            <div class="dashboard-kpi-title"><img src="<%= brandingIcons.box || '/icons/box.webp' %>" class="icon me-2" alt="Box icon"><%= t('dashboard.kpi.occupation') %></div>
                             <div class="dashboard-kpi-percentage" id="ocupacion-actual">--</div>
                             <div class="dashboard-kpi-subtext" id="ocupacion-subtext"><%= t('dashboard.loading') %></div>
                         </div>
                     </div>
                     <div class="col-12 col-md-6 col-lg-3">
                         <div class="dashboard-kpi-card">
-                            <div class="dashboard-kpi-title"><i class="fas fa-clipboard-list me-2"></i><%= t('dashboard.kpi.total_appointments') %></div>
+                            <div class="dashboard-kpi-title"><img src="<%= brandingIcons.agenda || '/icons/calendario.webp' %>" class="icon me-2" alt="Agenda icon"><%= t('dashboard.kpi.total_appointments') %></div>
                             <div class="dashboard-kpi-percentage" id="total-consultas">--</div>
                             <div class="dashboard-kpi-subtext" id="consultas-subtext"><%= t('dashboard.loading') %></div>
                         </div>
@@ -163,7 +166,7 @@
                         </div>
                         <div class="col-12 col-sm-6 col-lg-6 col-xl-4">
                             <div class="dashboard-chart-container-card">
-                                <div class="dashboard-chart-title"><i class="fas fa-calendar-week me-2"></i><%= t('dashboard.charts.appointments_by_day') %></div>
+                                <div class="dashboard-chart-title"><img src="<%= brandingIcons.agenda || '/icons/calendario.webp' %>" class="icon me-2" alt="Agenda icon"><%= t('dashboard.charts.appointments_by_day') %></div>
                                 <canvas id="consultasPorDiaChart"></canvas>
                                 <div id="consultasPorDiaPlaceholder" class="dashboard-chart-container-placeholder">
                                     <i class="fas fa-calendar-week"></i><p><strong><%= t('dashboard.charts.no_data') %></strong><br><small><%= t('dashboard.charts.no_data_desc') %></small></p>
@@ -172,7 +175,7 @@
                         </div>
                         <div class="col-12 col-sm-12 col-lg-12 col-xl-4">
                             <div class="dashboard-chart-container-card">
-                                <div class="dashboard-chart-title"><i class="fas fa-user-md me-2"></i><%= t('dashboard.charts.doctor_performance') %></div>
+                                <div class="dashboard-chart-title"><img src="<%= brandingIcons.room || '/icons/doctor.png' %>" class="icon me-2" alt="Sala icon"><%= t('dashboard.charts.doctor_performance') %></div>
                                 <canvas id="rendimientoMedicosChart"></canvas>
                                 <div id="rendimientoMedicosPlaceholder" class="dashboard-chart-container-placeholder">
                                     <i class="fas fa-user-md"></i><p><strong><%= t('dashboard.charts.no_data') %></strong><br><small><%= t('dashboard.charts.no_data_desc') %></small></p>

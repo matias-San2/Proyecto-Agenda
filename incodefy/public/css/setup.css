@@ -1,0 +1,336 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+:root {
+  --setup-bg-start: rgba(10, 25, 47, 0.92);
+  --setup-bg-mid: rgba(15, 76, 117, 0.9);
+  --setup-bg-end: rgba(10, 25, 47, 0.95);
+  --setup-card-bg: rgba(13, 25, 45, 0.65);
+  --setup-border: rgba(255, 255, 255, 0.25);
+  --setup-text: #ffffff;
+  --setup-accent: #38bdf8;
+  --setup-accent-dark: #2563eb;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: 'Montserrat', sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--setup-bg-start), var(--setup-bg-mid), var(--setup-bg-end));
+  color: var(--setup-text);
+}
+
+.wrapper.setup-wrapper {
+  min-height: 100vh;
+  padding: min(4vw, 3rem) 1rem 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background: radial-gradient(circle at top, rgba(255, 255, 255, 0.15), transparent 45%);
+}
+
+.login-box.setup-box {
+  width: min(960px, 100%);
+  border-radius: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: var(--setup-card-bg);
+  backdrop-filter: blur(18px);
+  padding: clamp(2rem, 4vw, 3.25rem);
+  margin: 0 auto;
+}
+
+.setup-form {
+  width: 100%;
+}
+
+.setup-form h2 {
+  text-align: center;
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.setup-subtitle {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0.5rem 0 2rem;
+  font-size: 0.95rem;
+}
+
+.setup-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.setup-column {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 1.5rem;
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.setup-column h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+}
+
+.setup-column p {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.setup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.35rem 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.setup-grid.single-column {
+  grid-template-columns: 1fr;
+}
+
+.input-box {
+  position: relative;
+  border-bottom: 1px solid var(--setup-border);
+  padding-bottom: 0.25rem;
+  margin: 0;
+}
+
+.input-box label {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+  transition: 0.3s ease;
+  pointer-events: none;
+}
+
+.input-box input,
+.input-box select {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--setup-text);
+  font-size: 1rem;
+  padding: 0.75rem 2rem 0.25rem 0;
+  outline: none;
+}
+
+.input-box select {
+  appearance: none;
+  cursor: pointer;
+}
+
+.input-box input:focus ~ label,
+.input-box input:valid ~ label,
+.input-box input.has-value ~ label,
+.input-box select:focus ~ label,
+.input-box select:valid ~ label,
+.input-box select.has-value ~ label {
+  top: -0.5rem;
+  font-size: 0.8rem;
+  color: var(--setup-accent);
+}
+
+.input-box .icon {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+}
+
+.upload-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.upload-card {
+  border: 1px dashed rgba(255, 255, 255, 0.35);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.upload-card label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.upload-card small {
+  display: block;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.75rem;
+}
+
+.upload-card input[type="file"] {
+  width: 100%;
+  padding: 0.45rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(15, 23, 42, 0.6);
+  color: var(--setup-text);
+}
+
+.image-preview {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: flex-start;
+}
+
+.image-preview img {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.4rem;
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.image-preview img.hidden {
+  display: none;
+}
+
+.image-preview span {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.preview-card {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  padding: 1.6rem;
+  background: rgba(15, 23, 42, 0.45);
+  margin-bottom: 2rem;
+}
+
+.preview-card h3 {
+  margin: 0 0 0.35rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 1.05rem;
+}
+
+.preview-card p {
+  margin: 0 0 1rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.preview-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.preview-badges span {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+  background: rgba(56, 189, 248, 0.2);
+}
+
+.password-hint {
+  margin-top: -0.25rem;
+  margin-bottom: 1rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.password-hint ul {
+  margin: 0.25rem 0 0 1rem;
+  padding: 0;
+}
+
+.password-hint li {
+  margin-bottom: 0.15rem;
+}
+
+.setup-button {
+  width: 100%;
+  border: none;
+  border-radius: 40px;
+  height: 52px;
+  background: linear-gradient(135deg, var(--setup-accent), var(--setup-accent-dark));
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.setup-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(37, 99, 235, 0.3);
+}
+
+.setup-button:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 900px) {
+  .login-box.setup-box {
+    padding: 2.5rem 1.75rem;
+  }
+
+  .setup-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .setup-grid,
+  .upload-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .input-box input,
+  .input-box select {
+    padding-right: 0;
+  }
+
+  .input-box .icon {
+    display: none;
+  }
+
+  .login-box.setup-box {
+    padding: 2rem 1.25rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .setup-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .preview-card {
+    padding: 1.2rem;
+  }
+
+  .setup-button {
+    height: 48px;
+    font-size: 0.95rem;
+  }
+}

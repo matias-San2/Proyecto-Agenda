@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="<%= i18n.language %>">
+<html lang="<%= lang %>">
+
 <head>
   <meta charset="UTF-8">
   <title><%= t('box.title') %></title>
@@ -15,6 +16,9 @@
 </head>
 <!-- Se añade el atributo data-theme al body -->
 <body data-theme="<%= (locals.personalization && personalization['theme.mode']) || 'light' %>">
+    <% const brandingSource = (typeof personalization !== 'undefined' && personalization) ? personalization : (locals && locals.personalization ? locals.personalization : null); %>
+    <% const branding = (brandingSource && brandingSource.branding) ? brandingSource.branding : {}; %>
+    <% const brandingIcons = (branding && branding.icons) ? branding.icons : {}; %>
     <div class="container-fluid">
         <div class="row">
             <%- include('navbar') %>
@@ -97,7 +101,7 @@
 
                 <!-- Mensaje sin resultados -->
                 <div id="mensaje-no-resultados" class="no-resultados" style="display: none;">
-                    <i class="fas fa-search"></i>
+                    <img src="<%= brandingIcons.box || '/icons/box.webp' %>" class="icon" alt="Box icon">
                     <h3><%= t('common.no_results') %></h3>
                     <p><%= t('common.no_results_desc') %></p>
                 </div>

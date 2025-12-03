@@ -1,15 +1,19 @@
 // src/handlers/personalization.js
 const config = require('../../config/config');
+const path = require('path');
 
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, PutCommand, QueryCommand } = require("@aws-sdk/lib-dynamodb");
+const { DynamoDBDocumentClient, PutCommand, QueryCommand, GetCommand } = require("@aws-sdk/lib-dynamodb");
 const { SNSClient, PublishCommand } = require("@aws-sdk/client-sns");
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const multipart = require('lambda-multipart-parser');
 
 const { wasAlreadyProcessed, markAsProcessed } = require("../../utils/idempotency");
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 const snsClient = new SNSClient({});
+const s3Client = new S3Client({});
 
 // Parámetros disponibles para personalización
 const PERSONALIZATION_PARAMETERS = config.personalization.parameters;
@@ -130,6 +134,93 @@ module.exports.getPersonalization = async (event) => {
 };
 
 const dynamoBreaker = createCircuitBreaker({ failureThreshold: 3, cooldownMs: 20000 });
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
+const ALLOWED_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.svg'];
+const CONTENT_TYPE_BY_EXTENSION = {
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.svg': 'image/svg+xml'
+};
+/**
+ * POST /personalization/branding/upload
+ * Permite a un administrador subir logos/íconos por empresa.
+ */
+module.exports.uploadBrandingAsset = async (event) => {
+  try {
+    if (!process.env.BRANDING_BUCKET) {
+      return response(500, { ok: false, error: "Bucket de branding no configurado" });
+    }
+
+    const claims = event?.requestContext?.authorizer?.jwt?.claims || {};
+    const userEmail = claims.email;
+    const userSub = claims.sub;
+
+    if (!userSub) {
+      return response(401, { ok: false, error: "Usuario no autenticado" });
+    }
+
+    if (!(await ensureAdminAccess(userEmail))) {
+      return response(403, { ok: false, error: "Solo administradores pueden actualizar el branding" });
+    }
+
+    const parsed = await multipart.parse(event, true);
+    const { files = [], ...fields } = parsed || {};
+    const file = files[0];
+    const brandingField = (fields?.field || '').toString().trim();
+
+    if (!file) {
+      return response(400, { ok: false, error: "Debes adjuntar un archivo" });
+    }
+    if (!brandingField) {
+      return response(400, { ok: false, error: "Debes indicar el campo destino (field)" });
+    }
+
+    const fileValidation = validateUploadFile(file);
+    if (fileValidation) {
+      return response(400, { ok: false, error: fileValidation });
+    }
+
+    const empresaId = await resolveEmpresaId({ claims, fields });
+    if (!empresaId) {
+      return response(400, { ok: false, error: "No se pudo determinar el empresaId" });
+    }
+
+    const extension = path.extname(file.filename || '').toLowerCase();
+    const fileBuffer = getFileBuffer(file);
+    const normalizedName = normalizeName(brandingField).replace(/\./g, '-') || 'branding-asset';
+    const objectKey = `${empresaId}/branding/${normalizedName}${extension}`;
+
+    await s3Client.send(new PutObjectCommand({
+      Bucket: process.env.BRANDING_BUCKET,
+      Key: objectKey,
+      Body: fileBuffer,
+      ContentType: file.contentType || CONTENT_TYPE_BY_EXTENSION[extension] || 'application/octet-stream'
+    }));
+
+    const assetUrl = buildFileUrl(objectKey);
+
+    await docClient.send(new PutCommand({
+      TableName: process.env.PARAMETERS_TABLE,
+      Item: {
+        user_sub: empresaId,
+        parameter_key: brandingField,
+        parameter_value: assetUrl,
+        updated_at: new Date().toISOString(),
+        updated_by: userEmail || userSub
+      }
+    }));
+
+    return response(200, { ok: true, url: assetUrl });
+  } catch (error) {
+    console.error("[Personalization] Error en uploadBrandingAsset:", error);
+    return response(500, {
+      ok: false,
+      error: "Error interno del servidor",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
 
 /**
  * POST /personalization
@@ -295,6 +386,142 @@ function validateParameter(key, value) {
     default:
       return true;
   }
+}
+
+async function ensureAdminAccess(userEmail) {
+  if (!userEmail || !process.env.USER_ROLES_TABLE) return false;
+  try {
+    const data = await retryWithJitter(
+      async () => {
+        if (!dynamoBreaker.shouldAllow()) {
+          throw new Error("CircuitBreakerOpen");
+        }
+        const res = await docClient.send(new GetCommand({
+          TableName: process.env.USER_ROLES_TABLE,
+          Key: { user_email: userEmail }
+        }));
+        dynamoBreaker.reportSuccess();
+        return res;
+      },
+      { maxAttempts: 3, baseDelayMs: 200 }
+    );
+    const permissions = data.Item?.permissions || [];
+    return permissions.includes("admin.users");
+  } catch (err) {
+    dynamoBreaker.reportFailure();
+    console.error("[Personalization] No se pudo verificar permisos de administrador:", err);
+    return false;
+  }
+}
+
+async function resolveEmpresaId({ claims = {}, fields = {} }) {
+  const directCandidates = [
+    fields.empresaId,
+    fields.companyId,
+    claims['custom:empresaId'],
+    claims['empresaId'],
+    claims['custom:companyId'],
+    claims['companyId']
+  ].filter(Boolean);
+
+  if (directCandidates.length > 0) {
+    return directCandidates[0];
+  }
+
+  if (!claims.sub) {
+    return null;
+  }
+
+  try {
+    const personalizationMap = await loadPersonalizationMap(claims.sub);
+    const possibleKeys = [
+      'empresa.id',
+      'company.id',
+      'organization.id',
+      'personalization.empresa.id'
+    ];
+
+    for (const key of possibleKeys) {
+      if (personalizationMap[key]) {
+        return personalizationMap[key];
+      }
+    }
+  } catch (err) {
+    console.warn("[Personalization] No se pudo obtener empresaId desde personalization:", err.message);
+  }
+
+  return claims.sub || null;
+
+}
+
+async function loadPersonalizationMap(userSub) {
+  if (!userSub) return {};
+
+  const result = await retryWithJitter(
+    async () => {
+      if (!dynamoBreaker.shouldAllow()) {
+        throw new Error("CircuitBreakerOpen");
+      }
+      const res = await docClient.send(new QueryCommand({
+        TableName: process.env.PARAMETERS_TABLE,
+        KeyConditionExpression: "user_sub = :userSub",
+        ExpressionAttributeValues: { ":userSub": userSub }
+      }));
+      dynamoBreaker.reportSuccess();
+      return res;
+    },
+    { maxAttempts: 3, baseDelayMs: 200 }
+  );
+
+  const map = {};
+  (result.Items || []).forEach(item => {
+    map[item.parameter_key] = item.parameter_value;
+  });
+  return map;
+}
+
+function normalizeName(value, fallback = 'asset') {
+  return (value || fallback)
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '') || fallback;
+}
+
+function buildFileUrl(objectKey) {
+  const region = process.env.AWS_REGION || 'us-east-1';
+  return `https://${process.env.BRANDING_BUCKET}.s3.${region}.amazonaws.com/${objectKey}`;
+}
+
+function validateUploadFile(file) {
+  if (!file || !file.filename || !file.content) {
+    return "Archivo inválido";
+  }
+  const extension = path.extname(file.filename).toLowerCase();
+  if (!ALLOWED_EXTENSIONS.includes(extension)) {
+    return `Extensión no permitida. Solo se aceptan ${ALLOWED_EXTENSIONS.join(', ')}`;
+  }
+  const buffer = getFileBuffer(file);
+  if (!buffer.length) {
+    return "El archivo está vacío";
+  }
+  if (buffer.length > MAX_FILE_SIZE) {
+    return "El archivo excede el límite de 2 MB";
+  }
+  return null;
+}
+
+function getFileBuffer(file) {
+  if (!file || !file.content) return Buffer.alloc(0);
+  if (Buffer.isBuffer(file.content)) {
+    return file.content;
+  }
+  if (typeof file.content === 'string') {
+    return Buffer.from(file.content, 'base64');
+  }
+  return Buffer.from(file.content);
 }
 
 /**
