@@ -22,19 +22,25 @@ router.get('/notificaciones-usuario', async (req, res) => {
 
     const notificaciones = await req.apiClient.obtenerNotificaciones();
 
-    console.log(notificaciones)
-    
-    console.log(`✅ ${notificaciones.length} notificaciones obtenidas`);
+    console.log('✅ Notificaciones crudas obtenidas:', Array.isArray(notificaciones) ? notificaciones.length : 'no-array');
+    if (Array.isArray(notificaciones) && notificaciones.length > 0) {
+      console.log('🔍 Ejemplo notificación:', JSON.stringify(notificaciones[0], null, 2));
+    }
+
+    const t = typeof req.t === 'function' ? req.t.bind(req) : (k) => k;
 
     const data = await Promise.all(notificaciones.map(async (n) => {
       let detalleProcesado = [];
+      const esAuditoria = n.tipo === 'audit';
       let mensajeTraducido = n.descripcion;
 
       try {
-        const match = n.descripcion.match(/(\d+)/);
-        const count = match ? parseInt(match[1], 10) : 0;
-        if (count > 0) {
-          mensajeTraducido = req.t('notifications.import_success', { count });
+        if (!esAuditoria) {
+          const match = n.descripcion?.match(/(\d+)/);
+          const count = match ? parseInt(match[1], 10) : 0;
+          if (count > 0) {
+            mensajeTraducido = t('notifications.import_success', { count });
+          }
         }
 
         const detalleOriginal = typeof n.detalle === 'string' 
@@ -44,11 +50,13 @@ router.get('/notificaciones-usuario', async (req, res) => {
         if (Array.isArray(detalleOriginal)) {
           detalleProcesado = await Promise.all(detalleOriginal.map(async (consulta) => {
             try {
-              
-              let estadoTraducido = req.t('common.pending');
-              if (consulta.estado) {
+              let estadoTraducido = esAuditoria
+                ? (consulta.estado || 'creada')
+                : t('common.pending');
+
+              if (!esAuditoria && consulta.estado) {
                 const estadoKey = consulta.estado.toLowerCase().replace(/\s+/g, '_');
-                estadoTraducido = req.t(`notifications.${estadoKey}`, req.t('common.pending'));
+                estadoTraducido = t(`notifications.${estadoKey}`, t('common.pending'));
               }
 
               const tipoConsulta = consulta.tipoconsulta;
@@ -56,9 +64,11 @@ router.get('/notificaciones-usuario', async (req, res) => {
                 .normalize('NFD')
                 .replace(/[\u0300-\u036f]/g, '')
                 .toLowerCase();
-              const tipoConsultaTraducido = normalizedTipo === 'medica'
-                ? req.t('common.medical')
-                : req.t('common.non_medical');
+              const tipoConsultaTraducido = esAuditoria
+                ? (tipoConsulta || 'agenda')
+                : normalizedTipo === 'medica'
+                  ? t('common.medical')
+                  : t('common.non_medical');
 
               return {
                 fecha: consulta.fecha,
@@ -75,13 +85,23 @@ router.get('/notificaciones-usuario', async (req, res) => {
                 fecha: consulta.fecha || '',
                 horaInicio: consulta.horaInicio || consulta.horainicio || '',
                 horaFin: consulta.horaFin || consulta.horafin || '',
-                medico: req.t('common.unknown_doctor'),
-                box: req.t('common.unknown_box'),
-                estado: req.t('common.pending'),
-                tipoconsulta: req.t('common.medical')
+                medico: t('common.unknown_doctor'),
+                box: t('common.unknown_box'),
+                estado: t('common.pending'),
+                tipoconsulta: t('common.medical')
               };
             }
           }));
+        } else if (detalleOriginal && typeof detalleOriginal === 'object') {
+          detalleProcesado = [{
+            fecha: detalleOriginal.fecha || '',
+            horaInicio: detalleOriginal.horaInicio || '',
+            horaFin: detalleOriginal.horaFin || '',
+            medico: detalleOriginal.medico || (esAuditoria ? (n.userEmail || '') : t('common.unknown_doctor')),
+            box: detalleOriginal.box || detalleOriginal.resourceId || '',
+            estado: detalleOriginal.estado || (esAuditoria ? 'creada' : t('common.pending')),
+            tipoconsulta: detalleOriginal.tipoconsulta || (esAuditoria ? 'agenda' : t('common.medical'))
+          }];
         }
       } catch (e) {
         console.error('❌ Error procesando notificación:', e);
@@ -103,13 +123,13 @@ router.get('/notificaciones-usuario', async (req, res) => {
     res.json({ 
       notificaciones: data,
       headers: {
-        date: req.t('common.date'),
-        start_time: req.t('common.start_time'),
-        end_time: req.t('common.end_time'),
-        doctor: req.t('common.doctor'),
-        box: req.t('common.box'),
-        consult_type: req.t('common.consult_type'),
-        status: req.t('common.status')
+        date: t('common.date'),
+        start_time: t('common.start_time'),
+        end_time: t('common.end_time'),
+        doctor: t('common.doctor'),
+        box: t('common.box'),
+        consult_type: t('common.consult_type'),
+        status: t('common.status')
       }
     });
   } catch (err) {

@@ -72,11 +72,126 @@
   },
   "navbar": {
     "dashboard": "Dashboard",
-    "agenda": "Schedule",
-    "box": "Box",
+    "agenda": "Bookings",
+    "resources": "Resource management",
     "notifications": "Notifications",
     "profile": "Profile",
     "logout": "Logout"
+  },
+  "dashboard": {
+    "title": "Scheduling Panel",
+    "subtitle": "Consolidated view of bookings, blocks and resource usage",
+    "filters": {
+      "from": "From",
+      "to": "To",
+      "type": "Resource type",
+      "building": "Building",
+      "zone": "Zone/Floor",
+      "all": "All"
+    },
+    "sections": {
+      "kpis": "Key indicators",
+      "charts": "Bookings overview"
+    },
+    "kpis": {
+      "total": "Total bookings",
+      "total_sub": "Selected period",
+      "blocks": "Blocks",
+      "blocks_sub": "Blocked events",
+      "occupancy": "Occupancy",
+      "occupancy_sub": "Resources x days",
+      "avg": "Daily average",
+      "avg_sub": "Bookings per day"
+    },
+    "charts": {
+      "byDay": "Bookings per day",
+      "byType": "Bookings by resource type",
+      "byLocation": "Bookings by location"
+    }
+  },
+  "resources": {
+    "title": "Agenda resources",
+    "subtitle": "Create and manage boxes, rooms or spaces that can be booked.",
+    "new": {
+      "title": "New resource",
+      "identification": "Identification",
+      "name_ph": "Name (e.g., Room 101)",
+      "type_ph": "Type (box, room, hall)",
+      "id_ph": "Optional ID (auto if left blank)",
+      "characteristics": "Characteristics",
+      "capacity": "Capacity",
+      "base_duration": "Base duration (min)",
+      "buffer": "Buffer (min)",
+      "location": "Location",
+      "building": "Building/Wing",
+      "floor": "Floor/Level",
+      "zone": "Zone/Corridor",
+      "save": "Save resource"
+    },
+    "list": {
+      "title": "Existing resources",
+      "refresh": "Refresh",
+      "search": "Search by name or ID",
+      "type": "Type (box, room...)",
+      "building": "Building/Wing",
+      "zone": "Zone/Corridor",
+      "loading": "Loading resources..."
+    }
+  },
+  "resources.labels": {
+    "resource": "resource",
+    "id": "ID",
+    "capacity": "Capacity",
+    "base_duration": "Base duration",
+    "buffer": "Buffer",
+    "location": "Location",
+    "floor": "Floor"
+  },
+  "resources.actions": {
+    "block": "Block",
+    "delete": "Delete",
+    "enter_password": "Enter your password to confirm deletion",
+    "confirm_delete": "Delete resource",
+    "irreversible": "This action is irreversible.",
+    "block_title": "Block resource:"
+  },
+  "resources.status": {
+    "blocked": "Disabled",
+    "pending": "Pending"
+  },
+  "agenda": {
+    "title": "Bookings",
+    "subtitle": "Manage resources, view bookings and create new appointments.",
+    "sidebar": {
+      "resources": "Resources",
+      "search": "Search name or ID",
+      "type": "Type (box, room...)",
+      "building": "Building/Floor",
+      "zone": "Zone/Corridor",
+      "date": "Date"
+    },
+    "weekly": {
+      "title": "Weekly view of the resource",
+      "create": "Create booking"
+    },
+    "form": {
+      "title": "Create booking manually",
+      "resource": "Resource",
+      "mode": "Booking type",
+      "single": "Single",
+      "recurrent": "Recurrent (multi-day)",
+      "date": "Date",
+      "start": "Start time",
+      "duration": "Duration (min)",
+      "buffer": "Buffer (min)",
+      "select_days": "Select days:",
+      "from": "From",
+      "to": "To",
+      "agendado": "Booked for (optional)",
+      "worker": "Assigned worker (optional)",
+      "description": "Description (optional)",
+      "create": "Create"
+    }
   },
   "box": {
     "title": "Box Status",

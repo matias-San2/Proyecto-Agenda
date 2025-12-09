@@ -244,6 +244,20 @@ class ApiClient {
     });
     return response.data;
   }
+
+  // ============ SCHEDULING (Dynamo) ============
+  async obtenerRecursosAgenda() {
+    const response = await this.client.get('/scheduling/resources');
+    return response.data;
+  }
+
+  async obtenerReservasAgenda(fecha, resourceId) {
+    const params = new URLSearchParams();
+    if (fecha) params.append('date', fecha);
+    if (resourceId) params.append('resourceId', resourceId);
+    const response = await this.client.get(`/scheduling/reservations?${params.toString()}`);
+    return response.data;
+  }
 }
 
 module.exports = ApiClient;

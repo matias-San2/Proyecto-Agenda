@@ -26,25 +26,26 @@
         </li>
       <% } %>
       
-      <!-- Agenda -->
+      <!-- Agendamientos -->
       <% if (user.permissions.includes('agenda.read') || user.permissions.includes('admin.users')) { %>
         <li>
-          <a href="/agenda" class="menu-link <%= currentPath.startsWith('/agenda') ? 'active' : '' %>" data-tooltip="<%= t('navbar.agenda', 'Agenda') %>">
+          <a href="/agendamientos" class="menu-link <%= currentPath.startsWith('/agendamientos') ? 'active' : '' %>" data-tooltip="<%= t('navbar.agenda', 'Agendamientos') %>">
             <img src="<%= (branding.icons && branding.icons.agenda) || '/icons/calendario.webp' %>" class="icon" alt="">
-            <span><%= t('navbar.agenda', 'Agenda') %></span>
+            <span><%= t('navbar.agenda', 'Agendamientos') %></span>
+          </a>
+        </li>
+      <% } %>
+      
+      <!-- Recursos (gestión de agenda) -->
+      <% if (user.permissions.includes('agenda.write') || user.permissions.includes('admin.users')) { %>
+        <li>
+          <a href="/recursos" class="menu-link <%= currentPath.startsWith('/recursos') ? 'active' : '' %>" data-tooltip="<%= t('navbar.resources', 'Administración de recursos') %>">
+            <span><%= t('navbar.resources', 'Administración de recursos') %></span>
           </a>
         </li>
       <% } %>
       
       <!-- Box -->
-      <% if (user.permissions.includes('box.read') || user.permissions.includes('admin.users')) { %>
-        <li>
-          <a href="/box" class="menu-link <%= (currentPath.startsWith('/box') || currentPath === '/en-curso') ? 'active' : '' %>" data-tooltip="<%= t('navbar.box', 'Box') %>">
-            <img src="<%= (branding.icons && branding.icons.box) || '/icons/box.webp' %>" class="icon" alt="">
-            <span><%= t('navbar.box', 'Box') %></span>
-          </a>
-        </li>
-      <% } %>
     <% } %>
     
     <!-- Notificaciones -->

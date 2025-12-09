@@ -22,16 +22,12 @@
       </a>
     </li>
     <li>
-      <a href="/agenda" class="menu-link <%= currentPath === '/agenda' ? 'active' : '' %>" data-tooltip="Agenda">
+      <a href="/agendamientos" class="menu-link <%= currentPath === '/agendamientos' ? 'active' : '' %>" data-tooltip="Agendamientos">
         <img src="<%= (branding.icons && branding.icons.agenda) || '/icons/calendario.webp' %>" class="icon" alt="">
-        <span>Agenda</span>
+        <span>Agendamientos</span>
       </a>
     </li>
     <li>
-      <a href="/box" class="menu-link <%= currentPath.startsWith('/box') ? 'active' : '' %>" data-tooltip="Box">
-        <img src="<%= (branding.icons && branding.icons.box) || '/icons/box.webp' %>" class="icon" alt="">
-        <span>Box</span>
-      </a>
     </li>
     <li>
       <a href="/medicos" class="menu-link <%= currentPath === '/medicos' ? 'active' : '' %>" data-tooltip="Médicos">

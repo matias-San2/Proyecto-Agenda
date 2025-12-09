@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="<%= lng || 'es' %>">
+<head>
+  <meta charset="UTF-8">
+  <title>Recursos de Agenda</title>
+<link rel="stylesheet" href="/css/navbar.css">
+<link rel="stylesheet" href="/css/footer.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .panel-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+      border: 1px solid #e2e8f0;
+      color: #0f172a;
+    }
+    .panel-card h3 { font-size: 18px; margin-bottom: 12px; letter-spacing: 0.2px; }
+    .form-section-title { font-size: 15px; font-weight: 700; color: #334155; }
+    .badge-soft { background: #e0f2fe; color: #0f172a; border: 1px solid #bfdbfe; border-radius: 10px; padding: 4px 8px; font-size: 12px; }
+    .resource-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+      transition: all .15s ease;
+    }
+    .resource-card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(37, 99, 235, 0.12); }
+    .resource-meta { color: #64748b; font-size: 13px; }
+    .filter-pill { border-radius: 10px; border: 1px solid #e2e8f0; padding: 8px 10px; background: #f8fafc; }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #0f172a;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+    .status-free { background: #22c55e; }
+    .status-waiting { background: #f59e0b; }
+.status-inuse { background: #ef4444; }
+.status-disabled { background: #111827; }
+
+.block-modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15,23,42,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.block-modal .modal-card {
+  background: #fff;
+  padding: 16px;
+  border-radius: 12px;
+  width: 360px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+}
+  </style>
+  <%- include('partials/personalization-styles') %>
+</head>
+<body data-theme="<%= (personalization && personalization['theme.mode']) || 'light' %>">
+  <div class="container-fluid">
+    <div class="row">
+      <%- include('navbar') %>
+
+      <div class="main">
+        <div class="top-header">
+          <h1 class="page-title"><%= t('resources.title', 'Recursos de agenda') %></h1>
+          <p class="page-subtitle"><%= t('resources.subtitle', 'Crea y administra boxes, salas o habitaciones que podrán ser agendadas.') %></p>
+        </div>
+
+        <div class="row g-4">
+          <% if (canManage) { %>
+          <div class="col-12 col-lg-4">
+            <div class="panel-card">
+              <h3><i class="fa-solid fa-circle-plus me-2"></i><%= t('resources.new.title', 'Nuevo recurso') %></h3>
+              <form id="resourceForm" class="d-flex flex-column gap-2">
+                <input id="resEmpresaId" type="hidden" value="<%= empresaId || '' %>">
+                <div>
+                  <label class="form-label form-section-title"><%= t('resources.new.identification', 'Identificación') %></label>
+                  <input id="resName" type="text" class="form-control" placeholder="<%= t('resources.new.name_ph', 'Nombre (ej: Box 101)') %>" required>
+                  <input id="resType" type="text" class="form-control mt-2" placeholder="<%= t('resources.new.type_ph', 'Tipo (box, sala, habitación)') %>" required>
+                  <input id="resId" type="text" class="form-control mt-2" placeholder="<%= t('resources.new.id_ph', 'ID opcional (auto si se deja vacío)') %>">
+                </div>
+                <div>
+                  <label class="form-label form-section-title mt-1"><%= t('resources.new.characteristics', 'Características') %></label>
+                  <div class="d-flex gap-2">
+                    <input id="resCapacity" type="number" min="1" class="form-control" placeholder="<%= t('resources.new.capacity', 'Capacidad') %>">
+                    <input id="resDuration" type="number" min="5" step="5" class="form-control" placeholder="<%= t('resources.new.base_duration', 'Duración base (min)') %>">
+                    <input id="resBuffer" type="number" min="0" step="5" class="form-control" placeholder="<%= t('resources.new.buffer', 'Buffer (min)') %>">
+                  </div>
+                </div>
+                <div>
+                  <label class="form-label form-section-title mt-1"><%= t('resources.new.location', 'Ubicación') %></label>
+                  <div class="d-flex gap-2">
+                    <input id="resBuilding" type="text" class="form-control" placeholder="<%= t('resources.new.building', 'Edificio/Pabellón') %>">
+                    <input id="resFloor" type="text" class="form-control" placeholder="<%= t('resources.new.floor', 'Piso/Nivel') %>">
+                    <input id="resZone" type="text" class="form-control" placeholder="<%= t('resources.new.zone', 'Zona/Pasillo') %>">
+                  </div>
+                </div>
+                <button class="btn btn-primary mt-2" type="submit"><%= t('resources.new.save', 'Guardar recurso') %></button>
+                <span id="resourceMsg" class="text-muted" style="font-size:13px;"></span>
+              </form>
+            </div>
+          </div>
+          <% } %>
+
+          <div class="col-12 col-lg-8">
+            <div class="panel-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0"><i class="fa-solid fa-warehouse me-2"></i><%= t('resources.list.title', 'Recursos existentes') %></h3>
+                <button id="refreshBtn" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-rotate"></i> <%= t('resources.list.refresh', 'Actualizar') %></button>
+              </div>
+              <div class="row g-2 mt-3">
+                <div class="col-12 col-md-4">
+                  <input id="filterText" type="text" class="form-control" placeholder="<%= t('resources.list.search', 'Buscar por nombre o ID') %>">
+                </div>
+                <div class="col-6 col-md-3">
+                  <input id="filterType" type="text" class="form-control" placeholder="<%= t('resources.list.type', 'Tipo (box, sala...)') %>">
+                </div>
+                <div class="col-6 col-md-3">
+                  <input id="filterBuilding" type="text" class="form-control" placeholder="<%= t('resources.list.building', 'Edificio/Pabellón') %>">
+                </div>
+                <div class="col-6 col-md-2">
+                  <input id="filterZone" type="text" class="form-control" placeholder="<%= t('resources.list.zone', 'Zona/Pasillo') %>">
+                </div>
+              </div>
+              <div id="resourceList" class="mt-3 d-flex flex-column gap-2">
+                <div class="text-muted"><%= t('resources.list.loading', 'Cargando recursos...') %></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <%- include('footer') %>
+    </div>
+  </div>
+
+  <script>
+    const apiBase = "<%= apiBaseUrl %>";
+    const authToken = "<%= idToken %>";
+    let allResources = [];
+
+    const isoDateInput = (d = new Date()) => d.toISOString().slice(0, 10);
+
+    async function apiGet(url) {
+      const res = await fetch(apiBase + url, { headers: { Authorization: `Bearer ${authToken}` } });
+      if (!res.ok) throw new Error(`GET ${url} -> ${res.status}`);
+      return res.json();
+    }
+
+    async function apiPost(url, body) {
+      const res = await fetch(apiBase + url, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${authToken}`, "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        let data;
+        try { data = JSON.parse(txt); } catch (e) {}
+        const errObj = new Error(data?.message || `POST ${url} -> ${res.status}`);
+        errObj.status = res.status;
+        errObj.data = data;
+        throw errObj;
+      }
+      return res.json();
+    }
+
+    function renderResources(items) {
+      const container = document.getElementById("resourceList");
+      container.innerHTML = "";
+      if (!items.length) {
+        container.innerHTML = '<div class="text-muted">No hay recursos creados.</div>';
+        return;
+      }
+      items.forEach((r) => {
+        const statusLabel = r._status?.label || '—';
+        const statusClass = r._status?.class || '';
+        const card = document.createElement("div");
+        card.className = "resource-card";
+        card.innerHTML = `
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+             <div class="d-flex align-items-center gap-2">
+               <strong>${r.name || r.resourceId}</strong>
+                <span class="badge-soft">${r.type || '<%= t('resources.labels.resource', 'recurso') %>'}</span>
+             </div>
+             <div class="resource-meta mt-1">
+                <%= t('resources.labels.id', 'ID') %>: ${r.resourceId}<br>
+                <%= t('resources.labels.capacity', 'Capacidad') %>: ${r.capacity || '—'} | <%= t('resources.labels.base_duration', 'Duración base') %>: ${(r.rules && r.rules.baseDurationMinutes) || '—'} | <%= t('resources.labels.buffer', 'Buffer') %>: ${(r.rules && r.rules.bufferMinutes) || 0}
+             </div>
+             <div class="resource-meta mt-1">
+                <%= t('resources.labels.location', 'Ubicación') %>: ${(r.location && r.location.building) || '—'} ${(r.location && r.location.floor) ? ' · ' + '<%= t('resources.labels.floor', 'Piso') %>' + ' ' + r.location.floor : ''} ${(r.location && r.location.zone) ? ' · ' + r.location.zone : ''}
+             </div>
+              <div class="mt-2">
+                <span class="status-pill">
+                  <span class="status-dot ${statusClass}"></span>
+                  ${statusLabel}
+                </span>
+              </div>
+            </div>
+            <div class="d-flex flex-column gap-2 align-items-end">
+              <button class="btn btn-outline-secondary btn-sm" data-block="${r.resourceId}"><i class="fa-solid fa-ban me-1"></i><%= t('resources.actions.block', 'Bloquear') %></button>
+              <button class="btn btn-outline-danger btn-sm" data-delete="${r.resourceId}"><i class="fa-solid fa-trash me-1"></i><%= t('resources.actions.delete', 'Eliminar') %></button>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      container.querySelectorAll("button[data-delete]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const resourceId = btn.dataset.delete;
+          const pwd = prompt("<%= t('resources.actions.enter_password', 'Ingresa tu contraseña para confirmar eliminación') %>");
+          if (!pwd) return;
+          const sure = confirm(`<%= t('resources.actions.confirm_delete', '¿Eliminar el recurso') %> ${resourceId}? <%= t('resources.actions.irreversible', 'Esta acción es irreversible.') %>`);
+          if (!sure) return;
+          try {
+            await apiPost("/scheduling/resources/delete", { resourceId, password: pwd });
+            await loadResources();
+          } catch (err) {
+            alert("Error eliminando recurso: " + (err.message || "sin detalle"));
+          }
+        });
+      });
+
+      container.querySelectorAll("button[data-block]").forEach(btn => {
+        btn.addEventListener("click", () => openBlockModal(btn.dataset.block));
+      });
+    }
+
+    async function loadResources() {
+      try {
+        const data = await apiGet("/scheduling/resources");
+        allResources = await annotateStatuses(data || []);
+        applyFilters();
+      } catch (err) {
+        console.error(err);
+        const container = document.getElementById("resourceList");
+        container.innerHTML = '<div class="text-danger">Error cargando recursos</div>';
+      }
+    }
+
+    async function annotateStatuses(resources) {
+      const today = isoDateInput();
+      const now = new Date();
+      const enriched = await Promise.all((resources || []).map(async (r) => {
+        try {
+          const reservations = await apiGet(`/scheduling/reservations?resourceId=${encodeURIComponent(r.resourceId)}&date=${today}`);
+          const status = computeStatus(reservations || [], now);
+          return { ...r, _status: status };
+        } catch (err) {
+          console.error("Error obteniendo estado de recurso", r.resourceId, err);
+          return { ...r, _status: { label: '—', class: '' } };
+        }
+      }));
+      return enriched;
+    }
+
+    function computeStatus(reservations, now) {
+      const active = reservations.find(r => r.status !== 'cancelled' && new Date(r.start) <= now && new Date(r.end) > now);
+      if (active) {
+        if (active.status === 'blocked') return { label: 'Inhabilitado', class: 'status-disabled' };
+        return { label: 'En uso', class: 'status-inuse' };
+      }
+      const upcoming = reservations.find(r => r.status !== 'cancelled' && new Date(r.start) > now);
+      if (upcoming) return { label: 'En espera', class: 'status-waiting' };
+      return { label: 'Libre', class: 'status-free' };
+    }
+
+    function applyFilters() {
+      const text = (document.getElementById("filterText")?.value || "").toLowerCase();
+      const type = (document.getElementById("filterType")?.value || "").toLowerCase();
+      const building = (document.getElementById("filterBuilding")?.value || "").toLowerCase();
+      const zone = (document.getElementById("filterZone")?.value || "").toLowerCase();
+
+      const filtered = (allResources || []).filter(r => {
+        const nameId = `${r.name || ""} ${r.resourceId || ""}`.toLowerCase();
+        const rType = (r.type || "").toLowerCase();
+        const rBuilding = (r.location?.building || "").toLowerCase();
+        const rZone = (r.location?.zone || "").toLowerCase();
+        const matchText = !text || nameId.includes(text);
+        const matchType = !type || rType.includes(type);
+        const matchBuilding = !building || rBuilding.includes(building);
+        const matchZone = !zone || rZone.includes(zone);
+        return matchText && matchType && matchBuilding && matchZone;
+      });
+
+      renderResources(filtered);
+    }
+
+    function wireForm() {
+      const form = document.getElementById("resourceForm");
+      if (!form) return;
+      const msg = document.getElementById("resourceMsg");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        msg.textContent = "Guardando...";
+        const body = {
+          name: document.getElementById("resName").value.trim(),
+          type: document.getElementById("resType").value.trim(),
+          resourceId: document.getElementById("resId").value.trim() || undefined,
+          empresaId: document.getElementById("resEmpresaId").value || undefined,
+          capacity: document.getElementById("resCapacity").value ? Number(document.getElementById("resCapacity").value) : undefined,
+          rules: {
+            baseDurationMinutes: document.getElementById("resDuration").value ? Number(document.getElementById("resDuration").value) : undefined,
+            bufferMinutes: document.getElementById("resBuffer").value ? Number(document.getElementById("resBuffer").value) : undefined
+          },
+          location: {
+            building: document.getElementById("resBuilding").value.trim() || undefined,
+            floor: document.getElementById("resFloor").value.trim() || undefined,
+            zone: document.getElementById("resZone").value.trim() || undefined
+          }
+        };
+        if (!body.name || !body.type) {
+          msg.textContent = "Nombre y tipo son requeridos";
+          return;
+        }
+        try {
+          await apiPost("/scheduling/resources", body);
+          msg.textContent = "Recurso creado";
+          form.reset();
+          loadResources();
+        } catch (err) {
+          console.error(err);
+          msg.textContent = "Error: " + err.message;
+        }
+      });
+    }
+
+    // --- Bloqueo de recurso ---
+    let blockTarget = null;
+    function openBlockModal(resourceId) {
+      blockTarget = resourceId;
+      document.getElementById("blockResourceName").textContent = resourceId;
+      document.getElementById("blockStart").value = isoDateInput();
+      document.getElementById("blockEnd").value = isoDateInput();
+      document.getElementById("blockStartTime").value = "00:00";
+      document.getElementById("blockEndTime").value = "23:59";
+      document.getElementById("blockDesc").value = "";
+      document.getElementById("blockModal").style.display = "flex";
+    }
+    function closeBlockModal() {
+      document.getElementById("blockModal").style.display = "none";
+      blockTarget = null;
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+      loadResources();
+      const refresh = document.getElementById("refreshBtn");
+      if (refresh) refresh.addEventListener("click", loadResources);
+      ["filterText","filterType","filterBuilding","filterZone"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("input", applyFilters);
+      });
+      wireForm();
+
+      document.getElementById("blockCancel")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        closeBlockModal();
+      });
+      document.getElementById("blockForm")?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!blockTarget) return;
+        const startDate = document.getElementById("blockStart").value;
+        const endDate = document.getElementById("blockEnd").value;
+        const startTime = document.getElementById("blockStartTime").value || "00:00";
+        const endTime = document.getElementById("blockEndTime").value || "23:59";
+        const desc = document.getElementById("blockDesc").value || "";
+        if (!startDate || !endDate) {
+          alert("Ingresa fechas de inicio y término");
+          return;
+        }
+        const start = `${startDate}T${startTime}`;
+        const end = `${endDate}T${endTime}`;
+        try {
+          await apiPost("/scheduling/resources/block", { resourceId: blockTarget, start, end, description: desc });
+          closeBlockModal();
+          await loadResources();
+        } catch (err) {
+          alert("Error bloqueando recurso: " + (err.message || "sin detalle"));
+        }
+      });
+    });
+  </script>
+
+  <div id="blockModal" class="block-modal">
+    <div class="modal-card">
+      <h6>Bloquear recurso: <span id="blockResourceName"></span></h6>
+      <form id="blockForm" class="mt-2 d-flex flex-column gap-2">
+        <div class="d-flex gap-2">
+          <div class="flex-fill">
+            <label class="form-label">Desde</label>
+            <input type="date" id="blockStart" class="form-control">
+            <input type="time" id="blockStartTime" class="form-control mt-1" value="00:00">
+          </div>
+          <div class="flex-fill">
+            <label class="form-label">Hasta</label>
+            <input type="date" id="blockEnd" class="form-control">
+            <input type="time" id="blockEndTime" class="form-control mt-1" value="23:59">
+          </div>
+        </div>
+        <div>
+          <label class="form-label">Descripción</label>
+          <textarea id="blockDesc" class="form-control" rows="2" placeholder="Motivo del bloqueo"></textarea>
+        </div>
+        <div class="d-flex justify-content-end gap-2">
+          <button class="btn btn-secondary btn-sm" id="blockCancel">Cancelar</button>
+          <button class="btn btn-primary btn-sm" type="submit">Confirmar bloqueo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

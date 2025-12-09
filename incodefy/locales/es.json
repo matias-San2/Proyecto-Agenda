@@ -6,6 +6,121 @@
     "purple": "Morado",
     "orange": "Naranja"
   },
+  "dashboard": {
+    "title": "Panel de Agendamientos",
+    "subtitle": "Vista consolidada de reservas, bloqueos y uso de recursos",
+    "filters": {
+      "from": "Desde",
+      "to": "Hasta",
+      "type": "Tipo de recurso",
+      "building": "Edificio",
+      "zone": "Zona/Piso",
+      "all": "Todos"
+    },
+    "sections": {
+      "kpis": "Indicadores clave",
+      "charts": "Visión de reservas"
+    },
+    "kpis": {
+      "total": "Total reservas",
+      "total_sub": "Periodo seleccionado",
+      "blocks": "Bloqueos",
+      "blocks_sub": "Eventos bloqueados",
+      "occupancy": "Ocupación",
+      "occupancy_sub": "Recursos x días",
+      "avg": "Promedio diario",
+      "avg_sub": "Reservas por día"
+    },
+    "charts": {
+      "byDay": "Reservas por día",
+      "byType": "Reservas por tipo de recurso",
+      "byLocation": "Reservas por ubicación"
+    }
+  },
+  "resources": {
+    "title": "Recursos de agenda",
+    "subtitle": "Crea y administra boxes, salas o habitaciones que podrán ser agendadas.",
+    "new": {
+      "title": "Nuevo recurso",
+      "identification": "Identificación",
+      "name_ph": "Nombre (ej: Box 101)",
+      "type_ph": "Tipo (box, sala, habitación)",
+      "id_ph": "ID opcional (auto si se deja vacío)",
+      "characteristics": "Características",
+      "capacity": "Capacidad",
+      "base_duration": "Duración base (min)",
+      "buffer": "Buffer (min)",
+      "location": "Ubicación",
+      "building": "Edificio/Pabellón",
+      "floor": "Piso/Nivel",
+      "zone": "Zona/Pasillo",
+      "save": "Guardar recurso"
+    },
+    "list": {
+      "title": "Recursos existentes",
+      "refresh": "Actualizar",
+      "search": "Buscar por nombre o ID",
+      "type": "Tipo (box, sala...)",
+      "building": "Edificio/Pabellón",
+      "zone": "Zona/Pasillo",
+      "loading": "Cargando recursos..."
+    }
+  },
+  "resources.labels": {
+    "resource": "recurso",
+    "id": "ID",
+    "capacity": "Capacidad",
+    "base_duration": "Duración base",
+    "buffer": "Buffer",
+    "location": "Ubicación",
+    "floor": "Piso"
+  },
+  "resources.actions": {
+    "block": "Bloquear",
+    "delete": "Eliminar",
+    "enter_password": "Ingresa tu contraseña para confirmar eliminación",
+    "confirm_delete": "¿Eliminar el recurso",
+    "irreversible": "Esta acción es irreversible.",
+    "block_title": "Bloquear recurso:"
+  },
+  "resources.status": {
+    "blocked": "Inhabilitado",
+    "pending": "En espera"
+  },
+  "agenda": {
+    "title": "Agendamientos",
+    "subtitle": "Gestiona recursos, visualiza reservas y crea nuevas citas.",
+    "sidebar": {
+      "resources": "Recursos",
+      "search": "Buscar nombre o ID",
+      "type": "Tipo (box, sala...)",
+      "building": "Edificio/Piso",
+      "zone": "Zona/Pasillo",
+      "date": "Fecha"
+    },
+    "weekly": {
+      "title": "Vista semanal del recurso",
+      "create": "Crear agendamiento"
+    },
+    "form": {
+      "title": "Crear reserva manual",
+      "resource": "Recurso",
+      "mode": "Tipo de agendamiento",
+      "single": "Único",
+      "recurrent": "Recurrente (multi-día)",
+      "date": "Fecha",
+      "start": "Hora inicio",
+      "duration": "Duración (min)",
+      "buffer": "Buffer (min)",
+      "select_days": "Seleccione días:",
+      "from": "Desde",
+      "to": "Hasta",
+      "agendado": "Agendado (opcional)",
+      "worker": "Trabajador asignado (opcional)",
+      "description": "Descripción (opcional)",
+      "create": "Crear"
+    }
+  },
   "font_scales": {
     "small": "Pequeño",
     "medium": "Mediano",
@@ -72,8 +187,8 @@
   },
   "navbar": {
     "dashboard": "Panel",
-    "agenda": "Agenda",
-    "box": "Box",
+    "agenda": "Agendamientos",
+    "resources": "Administración de recursos",
     "notifications": "Notificaciones",
     "profile": "Perfil",
     "logout": "Cerrar Sesión"

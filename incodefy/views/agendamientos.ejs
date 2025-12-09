@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="<%= lng || 'es' %>">
+<head>
+  <meta charset="UTF-8">
+  <title><%= t('agenda.title', 'Agendamientos') %></title>
+  <link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .panel-card {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+      color: #0f172a;
+      border: 1px solid #e2e8f0;
+    }
+    .panel-card h3 { font-size: 18px; margin-bottom: 10px; letter-spacing: 0.2px; }
+    .panel-card hr { border-color: #e2e8f0; opacity: 0.35; }
+
+    .resource-pill {
+      cursor: pointer;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #f8fafc;
+      color: #0f172a;
+      border: 1px solid #e2e8f0;
+      transition: all .2s ease;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
+    }
+    .resource-pill:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08); }
+    .resource-pill.active {
+      background: linear-gradient(135deg, #e0ebff, #e8f0ff);
+      border-color: #2563eb;
+      color: #0f172a;
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.18);
+    }
+
+    .slot {
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #f4fbf5;
+      border: 1px solid #c9f2d5;
+      color: #0f172a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 6px 14px rgba(16, 185, 129, 0.08);
+      transition: all .18s ease;
+      gap: 10px;
+    }
+    .slot:hover { background: #e8f9eb; transform: translateY(-1px); box-shadow: 0 10px 18px rgba(16, 185, 129, 0.12); }
+    .slot .btn { border-radius: 10px; font-weight: 600; }
+
+    .reservation {
+      position: relative;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #eaf2ff, #e0f2fe);
+      border: 1.5px solid #c7ddff;
+      color: #0f172a;
+      margin-bottom: 8px;
+      box-shadow: 0 10px 22px rgba(59, 130, 246, 0.12);
+      transition: all .2s ease;
+    }
+    .reservation:hover { transform: translateY(-2px); box-shadow: 0 14px 26px rgba(59, 130, 246, 0.18); }
+    .reservation::before {
+      content: "\\f073";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      color: #2563eb;
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      opacity: 0.2;
+      font-size: 18px;
+    }
+    .reservation:has(.status-blocked) {
+      background: linear-gradient(135deg, #fff5e6, #ffeeda);
+      border-color: #fdba74;
+      box-shadow: 0 10px 22px rgba(245, 158, 11, 0.16);
+    }
+    .reservation:has(.status-cancelled) {
+      background: linear-gradient(135deg, #fff1f2, #ffe4e6);
+      border-color: #fecdd3;
+      box-shadow: 0 10px 22px rgba(239, 68, 68, 0.16);
+    }
+    .reservation:has(.status-booked) {
+      background: linear-gradient(135deg, #eaf2ff, #e0f2fe);
+      border-color: #bfdbfe;
+    }
+
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .status-booked { background: #3b82f6; }
+    .status-blocked { background: #f59e0b; }
+    .status-cancelled { background: #ef4444; }
+    .muted { color: #64748b; font-size: 13px; letter-spacing: 0.1px; }
+  
+    /* --- Vista semanal de recurso --- */
+    .week-grid-wrapper {
+        margin-top: 0.75rem;
+        border-radius: 1rem;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        position: relative;
+        min-height: 560px;
+        padding: 12px;
+    }
+    .week-grid {
+        display: grid;
+        grid-template-columns: 80px repeat(7, 1fr);
+        font-size: 0.75rem;
+        position: relative;
+    }
+    .week-grid-body {
+        display: flex;
+        flex-direction: column;
+    }
+    .week-grid-header {
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 0.5rem;
+        min-height: 38px;
+        text-align: center;
+        font-weight: 600;
+    }
+    .week-grid-hour-label {
+        padding: 0.4rem 0.5rem;
+        border-bottom: 1px solid #f1f5f9;
+        color: #64748b;
+    }
+    .week-grid-cell {
+        position: relative;
+        border-bottom: 1px solid #f1f5f9;
+        border-left: 1px solid #f1f5f9;
+        height: 40px;
+    }
+    .week-event {
+        position: absolute;
+        left: 4px;
+        right: 4px;
+        border-radius: 0.6rem;
+        padding: 0.25rem 0.4rem;
+        font-size: 0.7rem;
+        line-height: 1.1;
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+        border: 1px solid transparent;
+        cursor: pointer;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .week-event .week-event-title {
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+    .week-event .week-event-meta {
+        opacity: 0.8;
+    }
+    .week-event.booked {
+        background: #e0f2fe;
+        border-color: #bae6fd;
+        color: #0f172a;
+    }
+    .week-event .event-summary { display: block; }
+    .week-event .event-details { display: none; margin-top: 6px; font-size: 12px; line-height: 1.3; color: #0f172a; white-space: normal; }
+    .week-event.expanded {
+        z-index: 50;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+        padding: 10px;
+        border-radius: 12px;
+        background: #fff;
+        color: #0f172a;
+        white-space: normal;
+    }
+    .week-event.expanded .event-details { display: block; }
+    .week-event.expanded .event-summary { margin-bottom: 6px; }
+    .week-event.blocked {
+        background: #fff3cd;
+        border-color: #facc15;
+        color: #92400e;
+    }
+    .week-event.cancelled {
+        background: #fee2e2;
+        border-color: #fecaca;
+        color: #7f1d1d;
+    }
+    .week-event .event-summary { display: block; }
+    .week-event .event-details { display: none; margin-top: 6px; font-size: 12px; line-height: 1.3; color: #0f172a; white-space: normal; }
+    .week-event.expanded {
+        z-index: 50;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+        padding: 10px;
+        border-radius: 12px;
+        background: #fff;
+        color: #0f172a;
+        white-space: normal;
+    }
+    .week-event.expanded .event-details { display: block; }
+    .week-event.expanded .event-summary { margin-bottom: 6px; }
+    /* Permitir que los eventos expandan sobre la grilla */
+    .week-grid-cell { overflow: visible !important; }
+    .week-event.expanded {
+        position: absolute !important;
+        height: auto !important;
+        min-height: 140px;
+        white-space: normal !important;
+        overflow: visible !important;
+        padding: 10px;
+        background: #fff !important;
+        border: 1px solid #d0d7e2;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+        border-radius: 12px;
+        z-index: 100;
+    }
+    .week-event.expanded .event-details { display: block !important; }
+    .week-event.expanded .event-summary { margin-bottom: 6px; }
+    .week-grid-cell:hover {
+        background: rgba(148, 163, 184, 0.08);
+    }
+    .time-now-line {
+        position: absolute;
+        left: 80px;
+        right: 0;
+        height: 2px;
+        background: #ef4444;
+        z-index: 5;
+    }
+    .time-now-dot {
+        position: absolute;
+        left: 74px;
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: #ef4444;
+        border: 2px solid #fff;
+        z-index: 6;
+    }
+    .week-events-layer {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+    }
+    .week-event { pointer-events: auto; }
+
+</style>
+  <%- include('partials/personalization-styles') %>
+</head>
+<body data-theme="<%= (personalization && personalization['theme.mode']) || 'light' %>">
+  <div class="container-fluid">
+    <div class="row">
+      <%- include('navbar') %>
+
+      <div class="main">
+        <div class="top-header">
+          <h1 class="page-title"><%= t('agenda.title', 'Agendamientos') %></h1>
+          <p class="page-subtitle"><%= t('agenda.subtitle', 'Gestiona recursos, visualiza reservas y crea nuevas citas.') %></p>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-12 col-lg-3">
+            <div class="panel-card">
+              <h3><i class="fa-solid fa-building me-2"></i><%= t('agenda.sidebar.resources', 'Recursos') %></h3>
+              <div class="mb-3">
+                <input id="filterResText" type="text" class="form-control mb-2" placeholder="<%= t('agenda.sidebar.search', 'Buscar nombre o ID') %>">
+                <div class="row g-2">
+                  <div class="col-12">
+                    <input id="filterResType" type="text" class="form-control" placeholder="<%= t('agenda.sidebar.type', 'Tipo (box, sala...)') %>">
+                  </div>
+                  <div class="col-12">
+                    <input id="filterResBuilding" type="text" class="form-control" placeholder="<%= t('agenda.sidebar.building', 'Edificio/Piso') %>">
+                  </div>
+                  <div class="col-12">
+                    <input id="filterResZone" type="text" class="form-control" placeholder="<%= t('agenda.sidebar.zone', 'Zona/Pasillo') %>">
+                  </div>
+                </div>
+              </div>
+              <div id="resourceList" class="d-flex flex-column gap-2">
+                <div class="muted">Cargando recursos...</div>
+              </div>
+              <hr>
+              <div class="d-flex flex-column gap-2">
+                <label class="form-label"><%= t('agenda.sidebar.date', 'Fecha') %></label>
+                <input id="dateInput" type="date" class="form-control" />
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-9">
+            <!-- Vista semanal del recurso -->
+            <div class="panel-card" id="weeklyViewPanel">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h3 class="mb-0">
+                        <i class="fa-solid fa-calendar-week me-2"></i><%= t('agenda.weekly.title', 'Vista semanal del recurso') %>
+                    </h3>
+                    <div class="d-flex align-items-center gap-2">
+                        <button id="toggleManualForm" class="btn btn-outline-primary btn-sm">
+                            <i class="fa-solid fa-plus me-1"></i><%= t('agenda.weekly.create', 'Crear agendamiento') %>
+                        </button>
+                        <button id="weekPrev" class="btn btn-light btn-sm">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <strong id="weekLabel" class="mx-2 small"></strong>
+                        <button id="weekNext" class="btn btn-light btn-sm">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="weeklyGrid" class="week-grid-wrapper"></div>
+            </div>
+            </div>
+          </div>
+        </div>
+
+        <% if (canWriteAgenda) { %>
+        <div class="row g-4 mt-4">
+          <div class="col-12">
+            <div class="panel-card" id="manualFormCard" style="display:none;">
+              <h3><i class="fa-solid fa-plus me-2"></i><%= t('agenda.form.title', 'Crear reserva manual') %></h3>
+              <form id="manualForm" class="row gy-2 gx-3">
+                <div class="col-12 col-md-3">
+                  <label class="form-label"><%= t('agenda.form.resource', 'Recurso') %></label>
+                  <select id="manualResource" class="form-select" disabled></select>
+                </div>
+                <div class="col-12">
+                  <label class="form-label d-block"><%= t('agenda.form.mode', 'Tipo de agendamiento') %></label>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="mode" id="modeSingle" value="single" checked>
+                    <label class="form-check-label" for="modeSingle"><%= t('agenda.form.single', 'Único') %></label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="mode" id="modeRecurrent" value="recurrent">
+                    <label class="form-check-label" for="modeRecurrent"><%= t('agenda.form.recurrent', 'Recurrente (multi-día)') %></label>
+                  </div>
+                </div>
+                <div id="singleFields" class="col-12">
+                  <div class="row g-3">
+                    <div class="col-12 col-md-3">
+                      <label class="form-label"><%= t('agenda.form.date', 'Fecha') %></label>
+                      <input id="manualDate" type="date" class="form-control">
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <label class="form-label"><%= t('agenda.form.start', 'Hora inicio') %></label>
+                      <input id="manualTime" type="time" class="form-control" step="300">
+                    </div>
+                    <div class="col-6 col-md-2">
+                      <label class="form-label"><%= t('agenda.form.duration', 'Duración (min)') %></label>
+                      <input id="manualDuration" type="number" class="form-control" min="5" step="5" value="60">
+                    </div>
+                    <div class="col-6 col-md-2">
+                      <label class="form-label"><%= t('agenda.form.buffer', 'Buffer (min)') %></label>
+                      <input id="manualBuffer" type="number" class="form-control" min="0" step="5" value="0">
+                    </div>
+                  </div>
+                </div>
+
+                <div id="recurrentOptions" class="col-12" style="display:none;">
+                  <label class="form-label mt-2"><%= t('agenda.form.select_days', 'Seleccione días:') %></label>
+                  <div id="weekdayButtons" class="d-flex gap-2 flex-wrap mb-2"></div>
+                  <div id="weekdayConfigs" class="mt-2"></div>
+                  <div class="row g-2 mt-2">
+                    <div class="col-12 col-md-6">
+                      <label class="form-label"><%= t('agenda.form.from', 'Desde') %></label>
+                      <input type="date" id="periodStart" class="form-control">
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <label class="form-label"><%= t('agenda.form.to', 'Hasta') %></label>
+                      <input type="date" id="periodEnd" class="form-control">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="row g-3 mt-1">
+                    <div class="col-12 col-md-3">
+                      <label class="form-label"><%= t('agenda.form.agendado', 'Agendado (opcional)') %></label>
+                      <input id="manualAgendado" type="text" class="form-control" placeholder="Persona/cliente">
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <label class="form-label"><%= t('agenda.form.worker', 'Trabajador asignado (opcional)') %></label>
+                      <input id="manualTrabajador" type="text" class="form-control" placeholder="Profesional">
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <label class="form-label"><%= t('agenda.form.description', 'Descripción (opcional)') %></label>
+                      <input id="manualDescription" type="text" class="form-control" placeholder="Notas de la reserva">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <button class="btn btn-primary" type="submit"><%= t('agenda.form.create', 'Crear') %></button>
+                  <span id="manualMsg" class="ms-2 muted"></span>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <% } %>
+
+      </div>
+
+      <%- include('footer') %>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const apiBase = "<%= apiBaseUrl %>";
+    const authToken = "<%= idToken %>";
+    let allResources = [];
+    let resources = [];
+    let selectedResource = null;
+    const weekdayNames = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
+
+    const isoDateInput = (d = new Date()) => d.toISOString().slice(0, 10);
+
+    async function apiGet(url) {
+      const res = await fetch(apiBase + url, { headers: { Authorization: `Bearer ${authToken}` } });
+      if (!res.ok) throw new Error(`GET ${url} -> ${res.status}`);
+      return res.json();
+    }
+
+    async function apiPost(url, body) {
+      const res = await fetch(apiBase + url, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${authToken}`, "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        let data;
+        try { data = JSON.parse(txt); } catch (e) {}
+        const err = new Error(data?.message || `POST ${url} -> ${res.status}`);
+        err.status = res.status;
+        err.data = data;
+        throw err;
+      }
+      return res.json();
+    }
+
+    function renderResources() {
+      const list = document.getElementById("resourceList");
+      const select = document.getElementById("manualResource");
+      list.innerHTML = "";
+      select.innerHTML = "";
+
+      if (!resources.length) {
+        list.innerHTML = '<div class="muted">No hay recursos configurados.</div>';
+        return;
+      }
+
+      resources.forEach((r) => {
+        const pill = document.createElement("div");
+        pill.className = "resource-pill" + (selectedResource === r.resourceId ? " active" : "");
+        pill.innerHTML = `
+          <div class="d-flex flex-column">
+            <strong>${r.name || r.resourceId}</strong>
+            <span class="muted">${r.type || "recurso"}</span>
+          </div>
+        `;
+        pill.onclick = () => {
+          selectedResource = r.resourceId;
+          renderResources();
+          loadDayData();
+          loadWeekData();
+        };
+        list.appendChild(pill);
+
+        const opt = document.createElement("option");
+        opt.value = r.resourceId;
+        opt.textContent = r.name || r.resourceId;
+        select.appendChild(opt);
+      });
+
+      if (!selectedResource && resources.length) {
+        selectedResource = resources[0].resourceId;
+        renderResources();
+        loadDayData();
+      }
+    }
+
+    function applyResourceFilters() {
+      const text = (document.getElementById("filterResText")?.value || "").toLowerCase();
+      const type = (document.getElementById("filterResType")?.value || "").toLowerCase();
+      const building = (document.getElementById("filterResBuilding")?.value || "").toLowerCase();
+      const zone = (document.getElementById("filterResZone")?.value || "").toLowerCase();
+
+      resources = (allResources || []).filter(r => {
+        const nameId = `${r.name || ""} ${r.resourceId || ""}`.toLowerCase();
+        const rType = (r.type || "").toLowerCase();
+        const rBuilding = (r.location?.building || "").toLowerCase();
+        const rZone = (r.location?.zone || "").toLowerCase();
+        const matchText = !text || nameId.includes(text);
+        const matchType = !type || rType.includes(type);
+        const matchBuilding = !building || rBuilding.includes(building);
+        const matchZone = !zone || rZone.includes(zone);
+        return matchText && matchType && matchBuilding && matchZone;
+      });
+      renderResources();
+    }
+
+    function renderReservations(items) {
+      const container = document.getElementById("reservationsList");
+      container.innerHTML = "";
+      if (!items.length) {
+        container.innerHTML = '<div class="muted">Sin reservas para la fecha.</div>';
+        return;
+      }
+      items.sort((a, b) => (a.start || "").localeCompare(b.start || ""));
+      items.forEach((res) => {
+        const statusClass = res.status === "blocked" ? "status-blocked" : res.status === "cancelled" ? "status-cancelled" : "status-booked";
+        const div = document.createElement("div");
+        div.className = "reservation";
+        div.innerHTML = `
+          <div class="d-flex justify-content-between">
+            <div>
+              <span class="status-dot ${statusClass}"></span>
+              <strong>${res.title || res.resourceId}</strong>
+              <div class="muted">${new Date(res.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(res.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+            </div>
+            <span class="muted">${res.status || "booked"}</span>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function renderSlots(slots) {
+      const container = document.getElementById("slotsList");
+      container.innerHTML = "";
+      if (!slots.length) {
+        container.innerHTML = '<div class="muted">No hay disponibilidad para este día.</div>';
+        return;
+      }
+      slots.sort((a, b) => (a.start || "").localeCompare(b.start || ""));
+      slots.forEach((slot) => {
+        const div = document.createElement("div");
+        div.className = "slot";
+        const start = new Date(slot.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const end = new Date(slot.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        div.innerHTML = `
+          <span>${start} - ${end}</span>
+          <div class="d-flex align-items-center">
+            <span class="muted me-2">${slot.durationMinutes} min</span>
+            <% if (canWriteAgenda) { %><button class="btn btn-sm btn-success">Reservar</button><% } %>
+          </div>
+        `;
+        <% if (canWriteAgenda) { %>
+        div.querySelector("button").onclick = async () => {
+          try {
+            await apiPost("/scheduling/reservations", {
+              resourceId: selectedResource,
+              start: slot.start,
+              end: slot.end,
+              bufferMinutes: slot.bufferMinutes
+            });
+            await loadDayData();
+          } catch (err) {
+            alert("Error creando reserva: " + err.message);
+          }
+        };
+        <% } %>
+        container.appendChild(div);
+      });
+    }
+
+    function toMinutes(timeStr) {
+      const [datePart, timePart] = (timeStr || "").split("T");
+      if (!timePart) return 0;
+      const [h, m] = timePart.split(":");
+      return parseInt(h || "0", 10) * 60 + parseInt(m || "0", 10);
+    }
+
+    function renderWeeklyGrid(weekData) {
+      const grid = document.getElementById("weeklyGrid");
+      grid.innerHTML = "";
+      if (!weekData || !weekData.days || !weekData.days.length) {
+        grid.innerHTML = '<div class="muted p-3">Selecciona un recurso y fecha para ver la semana.</div>';
+        return;
+      }
+
+      const startHour = 0;
+      const endHour = 23;
+      const hours = [];
+      for (let h = startHour; h <= endHour; h++) {
+        hours.push(`${String(h).padStart(2, "0")}:00`);
+      }
+
+      const header = document.createElement("div");
+      header.className = "week-grid";
+      header.innerHTML = `<div class="week-grid-header"></div>` + weekData.days.map(d => `<div class="week-grid-header">${d.label}</div>`).join("");
+      grid.appendChild(header);
+
+      const body = document.createElement("div");
+      body.className = "week-grid-body";
+
+      hours.forEach((hourLabel, rowIdx) => {
+        const row = document.createElement("div");
+        row.className = "week-grid";
+        row.style.gridTemplateColumns = `80px repeat(${weekData.days.length}, 1fr)`;
+        row.style.height = "40px";
+        row.style.minHeight = "40px";
+
+        const label = document.createElement("div");
+        label.className = "week-grid-hour-label";
+        label.textContent = hourLabel;
+        row.appendChild(label);
+
+        weekData.days.forEach((day) => {
+          const cell = document.createElement("div");
+          cell.className = "week-grid-cell";
+          row.appendChild(cell);
+        });
+
+        body.appendChild(row);
+      });
+
+      grid.appendChild(body);
+
+      // Eventos posicionados
+      const headerOffset = header.getBoundingClientRect().height || 40;
+      const rowHeight = 40;
+      const gridWidth = grid.clientWidth || grid.getBoundingClientRect().width || 0;
+      const columnWidth = weekData.days.length ? (gridWidth - 80) / weekData.days.length : 0;
+      const leftOffset = 80;
+      weekData.days.forEach((day, colIdx) => {
+        (day.events || []).forEach((ev) => {
+          const start = new Date(ev.start);
+          const end = new Date(ev.end);
+          const startMin = start.getHours() * 60 + start.getMinutes();
+          const endMin = end.getHours() * 60 + end.getMinutes();
+          const clampedStart = Math.max(startMin, startHour * 60);
+          const clampedEnd = Math.min(endMin, (endHour + 1) * 60);
+          if (clampedEnd <= clampedStart) return;
+          const top = headerOffset + ((clampedStart - startHour * 60) / ((endHour - startHour + 1) * 60)) * (hours.length * rowHeight);
+          const height = Math.max(20, ((clampedEnd - clampedStart) / 60) * rowHeight);
+          const block = document.createElement("div");
+          const statusClass = ev.status ? ev.status : '';
+          block.className = `week-event ${statusClass}`;
+          block.style.top = `${top}px`;
+          block.style.height = `${height}px`;
+          block.style.left = `${leftOffset + colIdx * columnWidth + 4}px`;
+          block.style.width = `${Math.max(40, columnWidth - 8)}px`;
+          block.style.right = "auto";
+          block.setAttribute("data-id", ev.PK || ev.resourceId || "");
+          block.setAttribute("data-start", ev.start || "");
+          block.setAttribute("data-end", ev.end || "");
+          block.setAttribute("data-meta", encodeURIComponent(JSON.stringify(ev)));
+          const descText = ev.metadata?.description || ev.description || '';
+          const agendadoText = ev.metadata?.agendado || ev.metadata?.pacienteNombre || ev.metadata?.pacienteId || 'Sin dato';
+          const trabajadorText = ev.metadata?.trabajadorNombre || '—';
+          const isBlocked = (ev.status || "").toLowerCase() === "blocked";
+          const title = isBlocked ? "Bloqueado" : (ev.title || "Reserva");
+          block.innerHTML = `
+            <div class="event-summary">
+              <div class="small fw-bold">${title}</div>
+              <div class="small">${new Date(ev.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(ev.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+              <div class="week-event-meta">${ev.status || 'booked'}</div>
+            </div>
+            <div class="event-details">
+              <div class="small">Agendado: ${agendadoText}</div>
+              <div class="small">Trabajador: ${trabajadorText}</div>
+              <div class="small">Ubicación: ${resources.find(r => r.resourceId === selectedResource)?.name || selectedResource}</div>
+              <label class="small mt-1 mb-1">Descripción</label>
+              <textarea class="form-control form-control-sm event-desc" rows="2" ${isBlocked ? "readonly" : ""}>${descText}</textarea>
+              <div class="d-flex justify-content-between mt-2">
+                ${isBlocked ? "" : `<button type="button" class="btn btn-outline-danger btn-sm cancel-res" data-pk="${ev.PK || ''}" data-sk="${ev.SK || ''}">Cancelar</button>`}
+                <button type="button" class="btn btn-primary btn-sm save-desc" data-pk="${ev.PK || ''}" data-sk="${ev.SK || ''}">Guardar</button>
+              </div>
+            </div>
+          `;
+          grid.appendChild(block);
+        });
+      });
+    }
+
+    function weekRangeFromDate(dateStr) {
+      const d = new Date(dateStr + "T00:00:00");
+      const day = d.getDay();
+      const diffToMonday = day === 0 ? -6 : 1 - day;
+      const monday = new Date(d);
+      monday.setDate(d.getDate() + diffToMonday);
+      const days = [];
+      for (let i = 0; i < 7; i++) {
+        const curr = new Date(monday);
+        curr.setDate(monday.getDate() + i);
+        days.push({
+          date: curr.toISOString().slice(0, 10),
+          label: curr.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })
+        });
+      }
+      return days;
+    }
+
+    async function loadResources() {
+      try {
+        const data = await apiGet("/scheduling/resources");
+        allResources = data || [];
+        applyResourceFilters();
+      } catch (err) {
+        document.getElementById("resourceList").innerHTML = '<div class="muted">Error cargando recursos</div>';
+        console.error(err);
+      }
+    }
+
+    async function loadDayData() {
+      if (!selectedResource) return;
+      await loadWeekData();
+    }
+
+    async function loadWeekData() {
+      const gridLabel = document.getElementById("weekLabel");
+      const days = weekRangeFromDate(document.getElementById("dateInput").value || isoDateInput());
+      if (!selectedResource) {
+        renderWeeklyGrid({ days: [] });
+        return;
+      }
+      gridLabel.textContent = `${days[0].label} - ${days[6].label}`;
+      try {
+        const promises = days.map(d => apiGet(`/scheduling/reservations?resourceId=${encodeURIComponent(selectedResource)}&date=${d.date}`));
+        const results = await Promise.all(promises);
+        const enriched = days.map((d, idx) => ({
+          ...d,
+          events: results[idx] || []
+        }));
+        renderWeeklyGrid({ days: enriched });
+      } catch (err) {
+        console.error(err);
+        renderWeeklyGrid({ days: [] });
+      }
+    }
+
+    function setupInlineEventExpansion() {
+      const grid = document.getElementById("weeklyGrid");
+      if (!grid) return;
+      grid.addEventListener("click", async (e) => {
+        const target = e.target.closest(".week-event");
+        if (!target) return;
+        if (e.target.closest(".event-details")) return; // no colapsar al hacer clic dentro del detalle
+        e.stopPropagation();
+        document.querySelectorAll(".week-event.expanded").forEach(el => {
+          if (el !== target) el.classList.remove("expanded");
+        });
+        target.classList.toggle("expanded");
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest(".week-event")) {
+          document.querySelectorAll(".week-event.expanded").forEach(el => el.classList.remove("expanded"));
+        }
+      });
+
+      document.addEventListener("click", async (e) => {
+        const btn = e.target.closest(".save-desc");
+        if (!btn) return;
+        e.stopPropagation();
+        const parent = btn.closest(".week-event");
+        const textarea = parent?.querySelector(".event-desc");
+        const pk = btn.dataset.pk || "";
+        const sk = btn.dataset.sk || "";
+        if (!pk || !sk) {
+          alert("No se puede guardar descripción: falta PK/SK del evento");
+          return;
+        }
+        try {
+          await apiPost("/scheduling/reservations/update-description", {
+            PK: pk,
+            SK: sk,
+            description: textarea?.value || ""
+          });
+          parent?.classList.remove("expanded");
+          await loadWeekData();
+          await loadDayData();
+        } catch (err) {
+          alert("Error guardando descripción: " + (err.message || "sin detalle"));
+        }
+      });
+
+      document.addEventListener("click", async (e) => {
+        const btn = e.target.closest(".cancel-res");
+        if (!btn) return;
+        e.stopPropagation();
+        const pk = btn.dataset.pk || "";
+        const sk = btn.dataset.sk || "";
+        if (!pk || !sk) {
+          alert("No se puede cancelar: falta PK/SK del evento");
+          return;
+        }
+        const confirmado = confirm("¿Cancelar esta reserva?");
+        if (!confirmado) return;
+        try {
+          await apiPost("/scheduling/reservations/cancel", { PK: pk, SK: sk });
+          document.querySelectorAll(".week-event.expanded").forEach(el => el.classList.remove("expanded"));
+          await loadWeekData();
+          await loadDayData();
+        } catch (err) {
+          alert("Error cancelando: " + (err.message || "sin detalle"));
+        }
+      });
+    }
+
+    function shiftDate(days) {
+      const input = document.getElementById("dateInput");
+      const base = input.value ? new Date(input.value) : new Date();
+      base.setDate(base.getDate() + days);
+      input.value = base.toISOString().slice(0, 10);
+      loadDayData();
+      loadWeekData();
+    }
+
+    function wireManualForm() {
+      const form = document.getElementById("manualForm");
+      if (!form) return;
+      const msg = document.getElementById("manualMsg");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        msg.textContent = "";
+        const resourceId = document.getElementById("manualResource").value || selectedResource;
+        const mode = document.querySelector('input[name="mode"]:checked')?.value || "single";
+        const date = document.getElementById("manualDate").value;
+        const time = document.getElementById("manualTime").value;
+        const duration = parseInt(document.getElementById("manualDuration").value || "0", 10);
+        const buffer = parseInt(document.getElementById("manualBuffer").value || "0", 10);
+        const agendado = (document.getElementById("manualAgendado")?.value || "").trim();
+        const trabajador = (document.getElementById("manualTrabajador")?.value || "").trim();
+        const descripcion = (document.getElementById("manualDescription")?.value || "").trim();
+
+        if (!resourceId) {
+          msg.textContent = "Selecciona un recurso";
+          return;
+        }
+
+        try {
+          if (mode === "recurrent") {
+            const payload = buildRecurringPayload(resourceId);
+            if (!payload.days.length) {
+              msg.textContent = "Selecciona al menos un día y horarios para recurrente";
+              return;
+            }
+            if (!payload.periodStart || !payload.periodEnd) {
+              msg.textContent = "Completa fecha de inicio y término";
+              return;
+            }
+            if (new Date(payload.periodEnd) < new Date(payload.periodStart)) {
+              msg.textContent = "La fecha de término debe ser >= inicio";
+              return;
+            }
+            if (descripcion) payload.metadata.description = descripcion;
+            if (agendado) payload.metadata.agendado = agendado;
+            if (trabajador) payload.metadata.trabajadorNombre = trabajador;
+            try {
+              await apiPost("/scheduling/reservations/recurring", payload);
+              msg.textContent = "Reservas recurrentes creadas";
+            } catch (err) {
+              if (err.status === 409 && err.data?.conflicts?.length) {
+                const lista = err.data.conflicts
+                  .map(c => c.date || (c.start || '').slice(0,10))
+                  .filter(Boolean)
+                  .join(", ");
+                const ok = confirm(`Conflicto en fechas: ${lista}\nSi aceptas se ignorarán las conflictivas y las demás se crearán.\n¿Quieres continuar?`);
+                if (!ok) {
+                  msg.textContent = "Operación cancelada por conflicto";
+                  return;
+                }
+                await apiPost("/scheduling/reservations/recurring", { ...payload, confirmIgnoreConflicts: true });
+                msg.textContent = "Reservas recurrentes creadas (conflictos ignorados)";
+              } else {
+                throw err;
+              }
+            }
+          } else {
+            if (!date || !time || !duration) {
+              msg.textContent = "Completa fecha, hora y duración";
+              return;
+            }
+            if (duration <= 0) {
+              msg.textContent = "La duración debe ser mayor que 0";
+              return;
+            }
+            const startISO = `${date}T${time}`;
+            await apiPost("/scheduling/reservations", {
+              resourceId,
+              start: startISO,
+              durationMinutes: duration,
+              bufferMinutes: buffer,
+              metadata: {
+                ...(agendado ? { agendado } : {}),
+                ...(trabajador ? { trabajadorNombre: trabajador } : {}),
+                ...(descripcion ? { description: descripcion } : {})
+              }
+            });
+            msg.textContent = "Reserva creada";
+          }
+          await loadDayData();
+          // ocultar formulario al guardar
+          const card = document.getElementById("manualFormCard");
+          if (card) card.style.display = "none";
+        } catch (err) {
+          msg.textContent = "Error: " + err.message;
+        }
+      });
+    }
+
+    function buildRecurringPayload(resourceId) {
+      const daysSelected = Array.from(document.querySelectorAll(".weekday-btn.active")).map((btn) => Number(btn.dataset.day));
+      const days = daysSelected.map((d) => ({
+        weekday: d + 1, // backend acepta 1-7
+        startTime: document.getElementById(`start-${d}`)?.value || "",
+        endTime: document.getElementById(`end-${d}`)?.value || "",
+        bufferMinutes: Number(document.getElementById(`buffer-${d}`)?.value || "0")
+      }));
+      // filtrar días con hora fin > hora inicio
+      const validDays = days.filter((d) => d.startTime && d.endTime && d.endTime > d.startTime);
+      return {
+        resourceId,
+        periodStart: document.getElementById("periodStart").value || isoDateInput(),
+        periodEnd: document.getElementById("periodEnd").value || isoDateInput(),
+        days: validDays,
+        metadata: {}
+      };
+    }
+
+    function setupRecurringUI() {
+      const options = document.getElementById("recurrentOptions");
+      const weekdayButtons = document.getElementById("weekdayButtons");
+      const configsContainer = document.getElementById("weekdayConfigs");
+      if (!options || !weekdayButtons || !configsContainer) return;
+
+      const modeInputs = document.querySelectorAll('input[name="mode"]');
+      const singleFields = document.getElementById("singleFields");
+      modeInputs.forEach((inp) => {
+        inp.addEventListener("change", () => {
+          const mode = document.querySelector('input[name="mode"]:checked')?.value;
+          if (mode === "recurrent") {
+            options.style.display = "block";
+            if (singleFields) singleFields.style.display = "none";
+          } else {
+            options.style.display = "none";
+            if (singleFields) singleFields.style.display = "block";
+          }
+        });
+      });
+
+      for (let i = 0; i < 7; i++) {
+        const btn = document.createElement("button");
+        btn.className = "btn btn-outline-primary btn-sm weekday-btn";
+        btn.dataset.day = i;
+        btn.textContent = weekdayNames[i];
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          btn.classList.toggle("active");
+          if (btn.classList.contains("active")) {
+            addDayConfig(i, configsContainer);
+          } else {
+            removeDayConfig(i);
+          }
+        });
+        weekdayButtons.appendChild(btn);
+      }
+
+      document.getElementById("periodStart").value = isoDateInput();
+      const end = new Date();
+      end.setDate(end.getDate() + 30);
+      document.getElementById("periodEnd").value = isoDateInput(end);
+    }
+
+    function addDayConfig(day, container) {
+      if (document.getElementById("day-" + day)) return;
+      const div = document.createElement("div");
+      div.id = "day-" + day;
+      div.className = "border rounded p-3 mt-2";
+      div.innerHTML = `
+        <h6>${weekdayNames[day]}</h6>
+        <label>Hora inicio</label>
+        <input type="time" class="form-control" id="start-${day}">
+        <label class="mt-2">Hora término</label>
+        <input type="time" class="form-control" id="end-${day}">
+        <label class="mt-2">Buffer (min)</label>
+        <input type="number" class="form-control" id="buffer-${day}" value="5">
+      `;
+      container.appendChild(div);
+    }
+
+    function removeDayConfig(day) {
+      const block = document.getElementById("day-" + day);
+      if (block) block.remove();
+    }
+
+    function wireManualToggle() {
+      const btn = document.getElementById("toggleManualForm");
+      const card = document.getElementById("manualFormCard");
+      const select = document.getElementById("manualResource");
+      const dateInput = document.getElementById("manualDate");
+      if (!btn || !card) return;
+      btn.addEventListener("click", () => {
+        if (!selectedResource) {
+          alert("Selecciona un recurso primero");
+          return;
+        }
+        const isHidden = card.style.display === "none" || card.style.display === "";
+        card.style.display = isHidden ? "block" : "none";
+        if (isHidden) {
+          if (select) {
+            select.innerHTML = "";
+            const opt = document.createElement("option");
+            opt.value = selectedResource;
+            opt.textContent = resources.find(r => r.resourceId === selectedResource)?.name || selectedResource;
+            select.appendChild(opt);
+          }
+          if (dateInput && document.getElementById("dateInput").value) {
+            dateInput.value = document.getElementById("dateInput").value;
+          }
+        }
+      });
+    }
+
+    (function init() {
+      document.getElementById("dateInput").value = isoDateInput();
+      <% if (canWriteAgenda) { %>
+      document.getElementById("manualDate").value = isoDateInput();
+      <% } %>
+      document.getElementById("dateInput").addEventListener("change", () => { loadDayData(); loadWeekData(); });
+      const prevBtn = document.getElementById("weekPrev");
+      const nextBtn = document.getElementById("weekNext");
+      if (prevBtn) prevBtn.addEventListener("click", () => shiftDate(-7));
+      if (nextBtn) nextBtn.addEventListener("click", () => shiftDate(7));
+      loadResources();
+      ["filterResText","filterResType","filterResBuilding","filterResZone"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("input", applyResourceFilters);
+      });
+      <% if (canWriteAgenda) { %> wireManualForm(); wireManualToggle(); setupRecurringUI(); <% } %>
+      loadWeekData();
+      setupInlineEventExpansion();
+    })();
+  
+    // --- Vista semanal del recurso ---
+    let currentWeekStart = null;
+
+    function getMonday(date) {
+        const d = new Date(date);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+        return new Date(d.setDate(diff));
+    }
+
+    function formatDateLabel(date) {
+        return date.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    async function renderWeeklyView() {
+        const gridWrapper = document.getElementById('weeklyGrid');
+        const resourceSelect = document.getElementById('resourceSelect');
+        if (!gridWrapper || !resourceSelect) return;
+        const resourceId = resourceSelect.value;
+        if (!resourceId) {
+            gridWrapper.innerHTML = '<p class="text-muted small mb-2">Selecciona un recurso para ver la vista semanal.</p>';
+            return;
+        }
+        if (!currentWeekStart) {
+            currentWeekStart = getMonday(new Date());
+        }
+
+        const weekLabelEl = document.getElementById('weekLabel');
+        const monday = new Date(currentWeekStart);
+        const sunday = new Date(monday);
+        sunday.setDate(sunday.getDate() + 6);
+        if (weekLabelEl) {
+            weekLabelEl.textContent = formatDateLabel(monday) + ' - ' + formatDateLabel(sunday);
+        }
+
+        const days = [];
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(monday);
+            d.setDate(monday.getDate() + i);
+            days.push(d);
+        }
+
+        const reservationsByDay = [];
+        for (const d of days) {
+            const iso = d.toISOString().slice(0, 10);
+            try {
+                const data = await apiGet(`/scheduling/reservations?resourceId=${encodeURIComponent(resourceId)}&date=${iso}`);
+                reservationsByDay.push(data || []);
+            } catch (e) {
+                console.error('Error cargando reservas semanales:', e);
+                reservationsByDay.push([]);
+            }
+        }
+
+        const hours = [];
+        for (let h = 8; h <= 20; h++) {
+            hours.push(h);
+        }
+
+        const grid = document.createElement('div');
+        grid.className = 'week-grid';
+
+        const emptyHeader = document.createElement('div');
+        emptyHeader.className = 'week-grid-header';
+        emptyHeader.textContent = '';
+        grid.appendChild(emptyHeader);
+
+        const dayNames = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+        days.forEach((d, idx) => {
+            const hd = document.createElement('div');
+            hd.className = 'week-grid-header';
+            const label = dayNames[idx] + ' ' + d.getDate().toString().padStart(2, '0');
+            hd.textContent = label;
+            grid.appendChild(hd);
+        });
+
+        hours.forEach(hour => {
+            const hourLabel = document.createElement('div');
+            hourLabel.className = 'week-grid-hour-label';
+            hourLabel.textContent = String(hour).padStart(2, '0') + ':00';
+            grid.appendChild(hourLabel);
+
+            days.forEach((d, dayIndex) => {
+                const cell = document.createElement('div');
+                cell.className = 'week-grid-cell position-relative';
+                grid.appendChild(cell);
+
+                const dayRes = reservationsByDay[dayIndex] || [];
+                dayRes.forEach(res => {
+                    const start = new Date(res.start);
+                    const end = new Date(res.end);
+                    if (start.getHours() <= hour && end.getHours() > hour) {
+                        const ev = document.createElement('div');
+                        const status = (res.status || 'booked').toLowerCase();
+                        ev.className = 'week-event ' + status;
+                        ev.style.top = '4px';
+                        const durMinutes = (end - start) / 60000;
+                        const height = Math.max(24, (durMinutes / 60) * 40 - 6);
+                        ev.style.height = height + 'px';
+
+                        const title = document.createElement('div');
+                        title.className = 'week-event-title';
+                        title.textContent = res.title || 'Reserva';
+
+                        const meta = document.createElement('div');
+                        meta.className = 'week-event-meta';
+                        const paciente = res.metadata?.pacienteNombre || res.metadata?.pacienteId || '';
+                        const worker = res.metadata?.trabajadorNombre || '';
+                        meta.textContent = [paciente, worker].filter(Boolean).join(' · ');
+
+                        ev.appendChild(title);
+                        ev.appendChild(meta);
+
+                        cell.appendChild(ev);
+                    }
+                });
+            });
+        });
+
+        gridWrapper.innerHTML = '';
+        gridWrapper.appendChild(grid);
+
+        const today = new Date();
+        if (today >= monday && today <= sunday) {
+            const minutesFromStart = (today.getHours() - 8) * 60 + today.getMinutes();
+            const rowHeight = 40;
+            const offset = (minutesFromStart / 60) * rowHeight;
+
+            const line = document.createElement('div');
+            line.className = 'time-now-line';
+            line.style.top = (36 + offset) + 'px';
+
+            const dot = document.createElement('div');
+            dot.className = 'time-now-dot';
+            dot.style.top = (32 + offset) + 'px';
+
+            gridWrapper.appendChild(line);
+            gridWrapper.appendChild(dot);
+        }
+    }
+
+    function setupWeeklyViewControls() {
+        const prev = document.getElementById('weekPrev');
+        const next = document.getElementById('weekNext');
+        const resourceSelect = document.getElementById('resourceSelect');
+        if (!prev || !next || !resourceSelect) return;
+
+        if (!currentWeekStart) currentWeekStart = getMonday(new Date());
+
+        prev.addEventListener('click', () => {
+            currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+            renderWeeklyView();
+        });
+
+        next.addEventListener('click', () => {
+            currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+            renderWeeklyView();
+        });
+
+        resourceSelect.addEventListener('change', () => {
+            renderWeeklyView();
+        });
+    }
+
+  </script>
+</body>
+</html>

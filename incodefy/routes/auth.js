@@ -21,8 +21,7 @@ const cognitoClient = new CognitoIdentityProviderClient({
 // URLs configurables
 const API_BASE_URL = process.env.API_BASE_URL;
 const PERMISSIONS_ENDPOINT = process.env.PERMISSIONS_ENDPOINT;
-const PERSONALIZATION_ENDPOINT = process.env.PERSONALIZATION_ENDPOINT;
-
+const PERSONALIZATION_ENDPOINT = process.env.PERSONALIZATION_ENDPOINT || '/personalization';
 const PERMISSIONS_URL = `${API_BASE_URL}${PERMISSIONS_ENDPOINT}`;
 const PERSONALIZATION_URL = `${API_BASE_URL}${PERSONALIZATION_ENDPOINT}`;
 const ONBOARDING_URL = `${API_BASE_URL}/admin/onboarding/create-admin`;
@@ -31,32 +30,6 @@ const passwordSetupRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
 console.log('🔗 URLs configuradas:');
 console.log('   Permisos:', PERMISSIONS_URL);
 console.log('   Personalización:', PERSONALIZATION_URL);
-
-// Función para refrescar personalización del usuario
-const refreshUserPersonalization = async (req) => {
-  try {
-    console.log('🔄 Refrescando personalización para usuario:', req.session.user.email);
-    
-    const personalizationResponse = await fetch(PERSONALIZATION_URL, {
-      headers: {
-        'Authorization': `Bearer ${req.session.user.idToken}`
-      }
-    });
-    
-    if (personalizationResponse.ok) {
-      const personalizationData = await personalizationResponse.json();
-      req.session.user.personalization = personalizationData.final_parameters;
-      console.log('✅ Personalización actualizada en sesión:', personalizationData.final_parameters);
-      return true;
-    } else {
-      console.log('❌ Error en respuesta de personalización:', personalizationResponse.status);
-      return false;
-    }
-  } catch (err) {
-    console.log('❌ Error refrescando personalización:', err.message);
-    return false;
-  }
-};
 
 // Página login
 router.get('/login', (req, res) => {
@@ -174,24 +147,30 @@ router.post('/login', async (req, res) => {
       req.session.user.ui_config = {};
     }
 
+    // Personalización (persistente en backend)
     try {
       console.log('📡 Obteniendo personalización desde:', PERSONALIZATION_URL);
       const personalizationResponse = await fetch(PERSONALIZATION_URL, {
         headers: { 'Authorization': `Bearer ${tokens.IdToken}` }
       });
-      
       if (personalizationResponse.ok) {
         const personalizationData = await personalizationResponse.json();
-        req.session.user.personalization = personalizationData.final_parameters;
+        req.session.user.personalization = personalizationData.final_parameters || {};
+        req.session.personalization = personalizationData.final_parameters || {};
+        if (personalizationData.final_parameters?.['locale.language']) {
+          req.session.lang = personalizationData.final_parameters['locale.language'];
+          req.session.language = personalizationData.final_parameters['locale.language'];
+        }
         console.log('✅ Personalización obtenida:', personalizationData.final_parameters);
       } else {
         console.log('⚠️ No se pudo obtener personalización:', personalizationResponse.status);
-        req.session.user.personalization = {};
+        req.session.user.personalization = req.session.user.personalization || {};
+        req.session.personalization = req.session.user.personalization;
       }
-      
     } catch (err) {
       console.log('❌ Error obteniendo personalización:', err.message);
-      req.session.user.personalization = {};
+      req.session.user.personalization = req.session.user.personalization || {};
+      req.session.personalization = req.session.user.personalization;
     }
 
     console.log('✅ Sesión creada:', {
@@ -267,4 +246,3 @@ router.get('/test-setup', (req, res) => {
 });
 // Exportar el router y la función de refresh
 module.exports = router;
-module.exports.refreshUserPersonalization = refreshUserPersonalization;

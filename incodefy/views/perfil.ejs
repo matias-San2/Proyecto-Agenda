@@ -38,8 +38,8 @@
                 </div>
               </div>
 
-              <!-- Formulario de personalización (sin cambios) -->
-              <form id="personalizationForm">
+              <!-- Formulario de personalización -->
+              <form id="personalizationForm" method="POST" action="/perfil">
                 <div class="form-section">
                   <h4><i class="fas fa-palette"></i> <%= t('profile.theme.title') %></h4>
                   <!-- Modo de tema -->
@@ -120,42 +120,14 @@
                   <h4><i class="fas fa-globe"></i> <%= t('profile.language.title') %></h4>
                   <div class="form-group">
                     <label><%= t('profile.language.interface_language') %></label>
-                    <select name="locale.language" class="form-select">
-                      <option value="es" <%= ((lang || 'es') === 'es') ? 'selected' : '' %>>
-                        🇪🇸 <%= t('languages.es', 'Español') %>
-                      </option>
-                      <option value="en" <%= (lang === 'en') ? 'selected' : '' %>>
-                        🇺🇸 <%= t('languages.en', 'English') %>
-                      </option>
+                    <select name="lang" class="form-select">
+                      <% const availableLangs = languages && languages.length ? languages : ['es','en']; %>
+                      <% availableLangs.forEach(code => { %>
+                        <option value="<%= code %>" <%= ((lang || 'es') === code) ? 'selected' : '' %>>
+                          <%= t(`languages.${code}`, code.toUpperCase()) %>
+                        </option>
+                      <% }) %>
                     </select>
-                  </div>
-                </div>
-
-                <% const currentThemeKey = locals.themeKey || 'hospital'; %>
-                <div class="form-section theme-selection">
-                  <h4><i class="fas fa-building"></i> Define el tema corporativo</h4>
-                  <p class="theme-selection__help">Elige el rubro que representa a tu empresa para ajustar textos, componentes y estilos generales.</p>
-                  <div class="theme-options">
-                    <% const themeOptions = [
-                      { key: 'hospital', title: 'Hospital', description: 'Interfaz con foco en pacientes, turnos y métricas médicas.' },
-                      { key: 'hotel', title: 'Hotel', description: 'Experiencia cálida enfocada en reservas y servicio al huésped.' },
-                      { key: 'deporte', title: 'Deporte', description: 'Visuales dinámicos pensados para centros deportivos y academias.' }
-                    ]; %>
-                    <% themeOptions.forEach(option => { %>
-                      <label class="theme-card">
-                        <input type="radio"
-                               name="themeKey"
-                               value="<%= option.key %>"
-                               <%= currentThemeKey === option.key ? 'checked' : '' %>>
-                        <div class="theme-card__body">
-                          <div class="theme-card__header">
-                            <span class="theme-card__title"><%= option.title %></span>
-                            <span class="theme-card__badge"><%= option.key %></span>
-                          </div>
-                          <p class="theme-card__description"><%= option.description %></p>
-                        </div>
-                      </label>
-                    <% }) %>
                   </div>
                 </div>
 
@@ -166,48 +138,7 @@
                   </button>
                 </div>
 
-                <!-- Loader y mensajes -->
-                <div id="loader" class="loader" style="display: none;">
-                  <i class="fas fa-spinner fa-spin"></i> <%= t('profile.messages.saving') %>
-                </div>
-                <div id="message" class="message"></div>
-                
               </form>
-              <% if (user && user.isAdmin) { %>
-                <div class="form-section">
-                  <h4><i class="fas fa-cloud-upload-alt"></i> Branding corporativo</h4>
-                  <p class="text-muted">Sube tus logos e íconos para personalizar la experiencia visual.</p>
-
-                  <form action="/perfil/branding" method="POST" enctype="multipart/form-data" class="mb-3">
-                    <label class="form-label fw-semibold">Logo de la empresa</label>
-                    <input type="hidden" name="field" value="branding.logo">
-                    <input type="file" name="file" accept=".png,.jpg,.jpeg,.svg" class="form-control mb-2" required>
-                    <button type="submit" class="btn btn-outline-primary btn-sm">Subir</button>
-                  </form>
-
-                  <form action="/perfil/branding" method="POST" enctype="multipart/form-data" class="mb-3">
-                    <label class="form-label fw-semibold">Ícono de Agenda</label>
-                    <input type="hidden" name="field" value="branding.icons.agenda">
-                    <input type="file" name="file" accept=".png,.jpg,.jpeg,.svg" class="form-control mb-2" required>
-                    <button type="submit" class="btn btn-outline-primary btn-sm">Subir</button>
-                  </form>
-
-                  <form action="/perfil/branding" method="POST" enctype="multipart/form-data" class="mb-3">
-                    <label class="form-label fw-semibold">Ícono de Box</label>
-                    <input type="hidden" name="field" value="branding.icons.box">
-                    <input type="file" name="file" accept=".png,.jpg,.jpeg,.svg" class="form-control mb-2" required>
-                    <button type="submit" class="btn btn-outline-primary btn-sm">Subir</button>
-                  </form>
-
-                  <form action="/perfil/branding" method="POST" enctype="multipart/form-data">
-                    <label class="form-label fw-semibold">Ícono de Sala</label>
-                    <input type="hidden" name="field" value="branding.icons.room">
-                    <input type="file" name="file" accept=".png,.jpg,.jpeg,.svg" class="form-control mb-2" required>
-                    <button type="submit" class="btn btn-outline-primary btn-sm">Subir</button>
-                  </form>
-                </div>
-              <% } %>
-
             </div>
           </div>
         </div>
@@ -216,63 +147,6 @@
       <%- include('footer') %>
     </div>
   </div>
-
-<script>
-    // Evento principal - Submit del formulario (guardar cambios)
-    document.getElementById('personalizationForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const loader = document.getElementById('loader');
-      const saveBtn = document.getElementById('saveBtn');
-      const messageDiv = document.getElementById('message');
-
-      // Mostrar loader y deshabilitar botón
-      loader.style.display = 'block';
-      saveBtn.disabled = true;
-      messageDiv.style.display = 'none';
-
-      try {
-        const formData = new FormData(this);
-        const parameters = Object.fromEntries(formData.entries());
-        
-        const response = await fetch('/api/personalization', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ parameters })
-        });
-
-        const result = await response.json();
-        if (!result.ok) {
-          throw new Error(result.error || '<%= t('profile.messages.save_error') %>');
-        }
-
-        // Mostrar mensaje de éxito y recargar la página para aplicar cambios
-        messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> <%= t('profile.messages.save_success') %>`;
-        messageDiv.className = 'message success';
-        messageDiv.style.display = 'block';
-
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500); // Espera para que el usuario vea el mensaje
-
-      } catch (error) {
-        messageDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Error: ${error.message}`;
-        messageDiv.className = 'message error';
-        messageDiv.style.display = 'block';
-        loader.style.display = 'none';
-        saveBtn.disabled = false;
-      }
-    });
-
-    // El botón de vista previa ya no es necesario con este flujo, pero lo dejamos por si se reutiliza.
-    // Puedes ocultarlo o eliminarlo del HTML si lo deseas.
- //   document.getElementById('previewBtn').addEventListener('click', function() {
-  //       const messageDiv = document.getElementById('message');
-   //      messageDiv.innerHTML = `<i class="fas fa-info-circle"></i> <%= t('profile.messages.preview_disabled') %>`;
-  //      messageDiv.className = 'message info';
-   //      messageDiv.style.display = 'block';
-  //       setTimeout(() => { messageDiv.style.display = 'none'; }, 4000);
-  //   });
-</script>
 <% if (user && (user.role === 'admin' || user.role === 'superadmin')) { %>
   <div class="form-section mt-5">
     <h4 class="text-danger"><i class="fas fa-exclamation-triangle"></i> Eliminar empresa</h4>

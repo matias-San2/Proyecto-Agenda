@@ -1,13 +1,12 @@
 // server.js
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const db = require('./db');
 const fetch = require('node-fetch');
 const methodOverride = require('method-override');
-
-// === i18next configuración para internacionalización ===
-// const i18next = require('./i18n');
-// const i18nextHttpMiddleware = require('i18next-http-middleware');
+const i18next = require('./i18n');
+const i18nextHttpMiddleware = require('i18next-http-middleware');
 const cookieParser = require('cookie-parser');
 
 const app = express();
@@ -27,7 +26,6 @@ app.use(methodOverride('_method'));
 // === Configuración de Sesión ===
 const session = require('express-session');
 const flash = require('connect-flash');
-const themeMiddleware = require('./middleware/themeMiddleware');
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'clave-secreta',
@@ -38,30 +36,21 @@ app.use(session({
   }
 }));
 
-app.use(themeMiddleware); 
-
 // === Integración de i18next (Internacionalización) ===
-// 1. Añade las funciones de i18next (req.t, req.i18n) a cada petición.
-//    Debe ir DESPUÉS de la sesión para poder persistir el idioma.
-// app.use(i18nextHttpMiddleware.handle(i18next));
-
-// 2. Middleware para cambiar el idioma basado en la sesión y exponer la función `t` a las vistas.
-/*
+app.use(i18nextHttpMiddleware.handle(i18next));
 app.use((req, res, next) => {
-  // Si el usuario tiene un idioma guardado en la sesión, lo usamos.
+  // Sincronizar idioma desde sesión
   if (req.session && req.session.language && req.i18n?.language !== req.session.language) {
-    req.i18n.changeLanguage(req.session.language);
+    try { req.i18n.changeLanguage(req.session.language); } catch (_) {}
   }
-  // Hacemos la función `t` y el idioma actual disponibles en TODAS las vistas EJS
-  res.locals.t = req.t;
-  const currentLang = req.i18n?.language || req.language;
+  res.locals.t = req.t || ((k, fallback) => fallback || k);
+  const currentLang = req.i18n?.language || req.language || req.session?.language || 'es';
   res.locals.lng = currentLang;
-  res.locals.language = currentLang; // Alias para consistencia
-  // Compatibilidad con plantillas que esperan `i18n.language`
+  res.locals.lang = currentLang;
+  res.locals.language = currentLang;
   res.locals.i18n = { language: currentLang };
   next();
 });
-*/
 
 
 // === Middlewares de aplicación (dependen de sesión) ===
@@ -71,19 +60,13 @@ app.use((req, res, next) => {
   res.locals.error_msg = req.flash('error');
   res.locals.success_msg = req.flash('success');
   res.locals.user = req.session.user || null;
+  res.locals.personalization = req.session.personalization || req.session.user?.personalization || {};
   next();
 });
 
 // Importar middlewares
 const requireAuth = require('./middleware/requireAuth');
-const personalizationMiddleware = require('./middleware/personalization');
-const setLanguage = require('./middleware/setLanguage');
 const checkPermission = require('./middleware/checkPermission');
-
-// === MIDDLEWARES GLOBALES DE PERSONALIZACIÓN ===
-// Estos se ejecutarán en todas las rutas que vengan después de ellos.
-app.use(personalizationMiddleware);
-//app.use(setLanguage);
 
 
 // === RUTAS PÚBLICAS (sin autenticación) ===
@@ -111,18 +94,34 @@ app.use('/', adminTenantRoutes);
 
 // === RUTAS PROTEGIDAS (requieren autenticación) ===
 
-// Agenda - protegida
-app.get('/agenda', requireAuth, checkPermission('agenda.read'), (req, res) => {
+// Agendamientos - protegida
+app.get('/agendamientos', requireAuth, checkPermission('agenda.read'), (req, res) => {
   const userPermissions = req.session.user?.permissions || [];
-  
-  res.render('agenda', {
+
+  res.render('agendamientos', {
     currentPath: req.path,
     canViewAgenda: userPermissions.includes('agenda.read') || userPermissions.includes('admin.users'),
     canWriteAgenda: userPermissions.includes('agenda.write') || userPermissions.includes('admin.users'),
     canImport: userPermissions.includes('data.import') || userPermissions.includes('admin.users'),
     canExport: userPermissions.includes('data.export') || userPermissions.includes('admin.users'),
     personalization: req.session.user?.personalization || {},
-    idToken: req.session.user?.idToken || ''
+    idToken: req.session.user?.idToken || '',
+    apiBaseUrl: process.env.API_BASE_URL || ''
+  });
+});
+
+// Redirección legacy /agenda
+app.get('/agenda', (req, res) => res.redirect('/agendamientos'));
+
+// Gestión de recursos de agenda
+app.get('/recursos', requireAuth, checkPermission('agenda.write'), (req, res) => {
+  res.render('recursos', {
+    currentPath: req.path,
+    personalization: req.session.user?.personalization || {},
+    idToken: req.session.user?.idToken || '',
+    apiBaseUrl: process.env.API_BASE_URL || '',
+    canManage: true,
+    empresaId: req.session.user?.empresaId || null
   });
 });
 
@@ -152,10 +151,6 @@ app.get('/calendario/medico', requireAuth, checkPermission('agenda.read'), (req,
   });
 });
 
-// Box routes
-const boxRoutes = require('./routes/box');
-app.use('/', requireAuth, boxRoutes);
-
 // Detalle de box
 const detalleBoxRoutes = require('./routes/detalle_box');
 app.use('/', requireAuth, detalleBoxRoutes);
@@ -182,26 +177,97 @@ app.use('/admin', requireAuth, adminRoutes);
 
 // Perfil
 app.get('/perfil', requireAuth, (req, res) => {
+  const localesDir = path.join(__dirname, 'locales');
+  let languages = [];
+  try {
+    languages = fs.readdirSync(localesDir)
+      .filter(f => f.endsWith('.json'))
+      .map(f => f.replace('.json', ''));
+  } catch (e) {
+    console.warn('No se pudieron cargar idiomas desde locales:', e.message);
+    languages = ['es', 'en'];
+  }
   res.render('perfil', {
     currentPath: req.path,
     personalization: req.session.personalization || req.session.user?.personalization || {},
-    idToken: req.session.user?.idToken
+    idToken: req.session.user?.idToken,
+    languages
   });
 });
 
 app.post('/perfil', requireAuth, (req, res) => {
-  if (req.body.lang) {
-    req.session.lang = req.body.lang;
+  const personalization = req.session.personalization || {};
+  const mode = req.body['theme.mode'];
+  const primary = req.body['theme.primary_color'];
+  const fontScale = req.body['font.scale'];
+  const lang = req.body.lang;
+
+  if (mode) personalization['theme.mode'] = mode;
+  if (primary) personalization['theme.primary_color'] = primary;
+  if (fontScale) personalization['font.scale'] = fontScale;
+  if (lang) {
+    req.session.lang = lang;
+    req.session.language = lang;
+    if (req.i18n) {
+      try { req.i18n.changeLanguage(lang); } catch (_) {}
+    }
   }
 
-  if (req.session.user && req.session.user.isAdmin && req.body.themeKey) {
-    req.session.themeKey = req.body.themeKey;
+  req.session.personalization = personalization;
+  if (req.session.user) {
+    req.session.user.personalization = personalization;
   }
 
-  req.session.save(err => {
+  // Persistencia en cookies para futuras sesiones
+  res.cookie('personalization', JSON.stringify(personalization), {
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    httpOnly: false,
+    sameSite: 'lax'
+  });
+  if (lang) {
+    res.cookie('lang', lang, {
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      httpOnly: false,
+      sameSite: 'lax'
+    });
+  }
+
+  req.session.save(async err => {
     if (err) {
       console.error('Error al guardar la sesión para /perfil:', err);
+      return res.redirect('/perfil');
     }
+
+    // Enviar a backend para persistir (si está configurado)
+    if (process.env.API_BASE_URL) {
+      try {
+        const resp = await fetch(`${process.env.API_BASE_URL}/personalization`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${req.session.user?.idToken || ''}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            parameters: personalization,
+            empresaId: req.session.user?.empresaId,
+            userSub: req.session.user?.sub
+          })
+        });
+        if (resp.ok) {
+          const data = await resp.json().catch(() => ({}));
+          if (data.final_parameters) {
+            req.session.personalization = data.final_parameters;
+            if (req.session.user) req.session.user.personalization = data.final_parameters;
+          }
+        } else {
+          const txt = await resp.text();
+          console.warn('No se pudo guardar personalización en backend. Status:', resp.status, txt);
+        }
+      } catch (e) {
+        console.warn('No se pudo guardar personalización en backend:', e.message);
+      }
+    }
+
     res.redirect('/perfil');
   });
 });

@@ -80,8 +80,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Locale to use for date/time formatting based on current UI language
-    const CURRENT_LOCALE = '<%= i18n.language %>';
+    // Locale to use for date/time formatting based on current UI language 
+    const CURRENT_LOCALE = '<%= (typeof i18n !== "undefined" && i18n && i18n.language) ? i18n.language : ((locals && locals.i18n && locals.i18n.language) ? locals.i18n.language : "es") %>';
 
     // Basic HTML escaping to avoid injection from notification messages
     function escapeHTML(str) {
