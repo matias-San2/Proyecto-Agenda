@@ -4,15 +4,20 @@ const { DynamoDBDocumentClient, ScanCommand } = require("@aws-sdk/lib-dynamodb")
 const client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
 module.exports.handler = async () => {
-  const params = {
-    TableName: process.env.DB_NOTIFICACION,
-    Limit: 50
-  };
-
   try {
-    const data = await client.send(new ScanCommand(params));
+    const items = [];
+    let ExclusiveStartKey;
 
-    const items = data.Items || [];
+    do {
+      const data = await client.send(
+        new ScanCommand({
+          TableName: process.env.DB_NOTIFICACION,
+          ExclusiveStartKey
+        })
+      );
+      if (data.Items) items.push(...data.Items);
+      ExclusiveStartKey = data.LastEvaluatedKey;
+    } while (ExclusiveStartKey);
 
     items.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 

@@ -48,6 +48,8 @@ provider:
     STAGE: ${sls:stage}
     BRANDING_BUCKET: ${self:service}-${self:provider.stage}-assets
     ROLES_BASE_TABLE: ${self:service}-${sls:stage}-roles-base
+    RESOURCES_TABLE: ${self:service}-${sls:stage}-resources
+    SCHEDULES_TABLE: ${self:service}-${sls:stage}-schedules
     
   logs:
     httpApi: true
@@ -154,6 +156,11 @@ provider:
         - lambda:InvokeFunction
       Resource:
         - Fn::Sub: 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-*'
+
+    - Effect: Allow
+      Action:
+        - cognito-idp:InitiateAuth
+      Resource: "*"
     
     - Effect: Allow
       Action:
@@ -172,6 +179,20 @@ provider:
         - Fn::Sub: '${BoxInstrumentoTable.Arn}/index/*'
         - Fn::GetAtt: [NotificacionTable, Arn]
         - Fn::Sub: '${NotificacionTable.Arn}/index/*'
+
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:Query
+        - dynamodb:Scan
+      Resource:
+        - Fn::GetAtt: [ResourcesTable, Arn]
+        - Fn::Sub: '${ResourcesTable.Arn}/index/*'
+        - Fn::GetAtt: [SchedulesTable, Arn]
+        - Fn::Sub: '${SchedulesTable.Arn}/index/*'
 
     - Effect: Allow
       Action:
@@ -618,6 +639,117 @@ functions:
     layers:
       - { Ref: AwsSdkV3LayerLambdaLayer }
 
+  # === SCHEDULING GENÉRICO ===
+  createResource:
+    handler: src/handlers/scheduling/createResource.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
+    events:
+      - httpApi:
+          method: POST
+          path: /scheduling/resources
+          authorizer:
+            name: cognitoJwt
+
+  listResources:
+    handler: src/handlers/scheduling/listResources.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
+    events:
+      - httpApi:
+          method: GET
+          path: /scheduling/resources
+          authorizer:
+            name: cognitoJwt
+
+  createReservation:
+    handler: src/handlers/scheduling/createReservation.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
+    events:
+      - httpApi:
+          method: POST
+          path: /scheduling/reservations
+          authorizer:
+            name: cognitoJwt
+
+  listReservations:
+    handler: src/handlers/scheduling/listReservations.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
+    events:
+      - httpApi:
+          method: GET
+          path: /scheduling/reservations
+          authorizer:
+            name: cognitoJwt
+
+  listTimeslots:
+    handler: src/handlers/scheduling/listTimeslots.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
+    events:
+      - httpApi:
+          method: GET
+          path: /scheduling/timeslots
+          authorizer:
+            name: cognitoJwt
+
+  updateReservationDescription:
+    handler: src/handlers/scheduling/updateDescription.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
+    events:
+      - httpApi:
+          method: POST
+          path: /scheduling/reservations/update-description
+          authorizer:
+            name: cognitoJwt
+
+  createRecurringReservations:
+    handler: src/handlers/scheduling/createRecurringReservations.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
+    events:
+      - httpApi:
+          method: POST
+          path: /scheduling/reservations/recurring
+          authorizer:
+            name: cognitoJwt
+
+  cancelReservation:
+    handler: src/handlers/scheduling/cancelReservation.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
+    events:
+      - httpApi:
+          method: POST
+          path: /scheduling/reservations/cancel
+          authorizer:
+            name: cognitoJwt
+
+  deleteResource:
+    handler: src/handlers/scheduling/deleteResource.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
+    events:
+      - httpApi:
+          method: POST
+          path: /scheduling/resources/delete
+          authorizer:
+            name: cognitoJwt
+
+  blockResource:
+    handler: src/handlers/scheduling/blockResource.handler
+    layers:
+      - { Ref: AwsSdkV3LayerLambdaLayer }
+    events:
+      - httpApi:
+          method: POST
+          path: /scheduling/resources/block
+          authorizer:
+            name: cognitoJwt
+
 # Plugins comentados - no necesarios para deployment
 # plugins:
 #   - serverless-offline
@@ -923,6 +1055,78 @@ resources:
               - AttributeName: GSI1PK
                 KeyType: HASH
               - AttributeName: GSI1SK
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+
+    # === TABLA DE RECURSOS AGENDABLES ===
+    ResourcesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${sls:stage}-resources
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+          - AttributeName: GSI1PK
+            AttributeType: S
+          - AttributeName: GSI1SK
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: GSI1
+            KeySchema:
+              - AttributeName: GSI1PK
+                KeyType: HASH
+              - AttributeName: GSI1SK
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+
+    # === TABLA DE RESERVAS / AGENDA GENÉRICA ===
+    SchedulesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${sls:stage}-schedules
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+          - AttributeName: GSI1PK
+            AttributeType: S
+          - AttributeName: GSI1SK
+            AttributeType: S
+          - AttributeName: GSI2PK
+            AttributeType: S
+          - AttributeName: GSI2SK
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: GSI1
+            KeySchema:
+              - AttributeName: GSI1PK
+                KeyType: HASH
+              - AttributeName: GSI1SK
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: GSI2
+            KeySchema:
+              - AttributeName: GSI2PK
+                KeyType: HASH
+              - AttributeName: GSI2SK
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
