@@ -170,6 +170,16 @@
         <i class="fas fa-trash"></i> <%= t('tenant_deletion.button_delete', 'Eliminar empresa definitivamente') %>
       </button>
     </form>
+
+    <div class="mt-4 p-3 border rounded bg-light">
+      <h5 class="text-primary"><i class="fas fa-undo"></i> Inicio limpio (setup)</h5>
+      <p class="text-muted mb-2" style="font-size:0.95rem;">
+        Si no existe ningún usuario en Cognito y necesitas recrear la cuenta inicial, puedes volver al asistente de configuración. No borra roles base ni el user pool.
+      </p>
+      <a href="/setup" class="btn btn-outline-primary w-100" onclick="return confirm('¿Ir al asistente de configuración inicial? Asegúrate de no tener usuarios vigentes en Cognito.');">
+        <i class="fas fa-magic"></i> Ir a configuración inicial
+      </a>
+    </div>
   </div>
 <% } %>
 </body>

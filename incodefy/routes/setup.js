@@ -29,10 +29,7 @@ router.get('/setup', (req, res) => {
 
 router.post(
   '/setup/create-admin',
-  upload.fields([
-    { name: 'profilePhoto', maxCount: 1 },
-    { name: 'companyLogo', maxCount: 1 }
-  ]),
+  upload.none(),
   async (req, res) => {
     try {
       const {
@@ -50,7 +47,7 @@ router.post(
         email: email.trim(),
         companyName: companyName.trim(),
         companyId: companyId.trim(),
-        industry: industry.trim()
+        industry: (industry || 'general').trim() || 'general'
       };
 
       const preserveFormData = () => {
@@ -93,22 +90,6 @@ router.post(
       formData.append('companyName', trimmedData.companyName);
       formData.append('companyId', trimmedData.companyId);
       formData.append('industry', trimmedData.industry);
-
-      if (req.files?.profilePhoto?.[0]) {
-        const file = req.files.profilePhoto[0];
-        formData.append('profilePhoto', file.buffer, {
-          filename: file.originalname,
-          contentType: file.mimetype
-        });
-      }
-
-      if (req.files?.companyLogo?.[0]) {
-        const file = req.files.companyLogo[0];
-        formData.append('companyLogo', file.buffer, {
-          filename: file.originalname,
-          contentType: file.mimetype
-        });
-      }
 
       const response = await fetch(apiUrl, {
         method: 'POST',
