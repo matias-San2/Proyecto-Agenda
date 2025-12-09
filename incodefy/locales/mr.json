@@ -6,6 +6,195 @@
     "purple": "जांभळा",
     "orange": "नारिंगी"
   },
+  "dashboard": {
+    "title": "Scheduling Panel",
+    "subtitle": "Consolidated view of bookings, blocks and resource usage",
+    "filters": {
+      "from": "From",
+      "to": "To",
+      "type": "Resource type",
+      "building": "Building",
+      "zone": "Zone/Floor",
+      "all": "All"
+    },
+    "sections": {
+      "kpis": "Key indicators",
+      "charts": "Bookings overview"
+    },
+    "kpis": {
+      "total": "Total bookings",
+      "total_sub": "Selected period",
+      "blocks": "Blocks",
+      "blocks_sub": "Blocked events",
+      "occupancy": "Occupancy",
+      "occupancy_sub": "Resources x days",
+      "avg": "Daily average",
+      "avg_sub": "Bookings per day"
+    },
+    "charts": {
+      "byDay": "Bookings per day",
+      "byType": "Bookings by resource type",
+      "byLocation": "Bookings by location"
+    },
+    "messages": {
+      "load_error": "Error loading dashboard"
+    }
+  },
+  "resources": {
+    "title": "Agenda resources",
+    "subtitle": "Create and manage boxes, rooms or spaces that can be booked.",
+    "new": {
+      "title": "New resource",
+      "identification": "Identification",
+      "name_ph": "Name (e.g., Room 101)",
+      "type_ph": "Type (box, room, hall)",
+      "id_ph": "Optional ID (auto if left blank)",
+      "characteristics": "Characteristics",
+      "capacity": "Capacity",
+      "base_duration": "Base duration (min)",
+      "buffer": "Buffer (min)",
+      "location": "Location",
+      "building": "Building/Wing",
+      "floor": "Floor/Level",
+      "zone": "Zone/Corridor",
+      "save": "Save resource"
+    },
+    "list": {
+      "title": "Existing resources",
+      "refresh": "Refresh",
+      "search": "Search by name or ID",
+      "type": "Type (box, room...)",
+      "building": "Building/Wing",
+      "zone": "Zone/Corridor",
+      "loading": "Loading resources..."
+    },
+    "block": {
+      "title": "Block resource",
+      "date_required": "Enter start and end dates",
+      "error": "Error blocking resource",
+      "description": "Description",
+      "reason_placeholder": "Blocking reason",
+      "confirm": "Confirm block"
+    }
+  },
+  "resources.labels": {
+    "resource": "resource",
+    "id": "ID",
+    "capacity": "Capacity",
+    "base_duration": "Base duration",
+    "buffer": "Buffer",
+    "location": "Location",
+    "floor": "Floor"
+  },
+  "resources.actions": {
+    "block": "Block",
+    "delete": "Delete",
+    "enter_password": "Enter your password to confirm deletion",
+    "confirm_delete": "Delete resource",
+    "irreversible": "This action is irreversible.",
+    "block_title": "Block resource:"
+  },
+  "resources.status": {
+    "blocked": "Disabled",
+    "pending": "Pending"
+  },
+  "agenda": {
+    "title": "कार्यसूची",
+    "subtitle": "Manage resources, view bookings and create new appointments.",
+    "sidebar": {
+      "resources": "Resources",
+      "search": "Search name or ID",
+      "type": "Type (box, room...)",
+      "building": "Building/Floor",
+      "zone": "Zone/Corridor",
+      "date": "Date"
+    },
+    "weekly": {
+      "title": "Weekly view of the resource",
+      "create": "Create booking"
+    },
+    "form": {
+      "title": "Create booking manually",
+      "resource": "Resource",
+      "mode": "Booking type",
+      "single": "Single",
+      "recurrent": "Recurrent (multi-day)",
+      "date": "Date",
+      "start": "Start time",
+      "duration": "Duration (min)",
+      "buffer": "Buffer (min)",
+      "select_days": "Select days:",
+      "from": "From",
+      "to": "To",
+      "agendado": "Booked for (optional)",
+      "worker": "Assigned worker (optional)",
+      "description": "Description (optional)",
+      "create": "Create",
+      "end": "End time"
+    },
+    "main_title": "Agenda System",
+    "main_subtitle": "Manage your medical agenda efficiently",
+    "management": {
+      "title": "Agenda Management",
+      "description": "View and manage your medical appointments",
+      "box": "खोली",
+      "doctor": "डॉक्टर"
+    },
+    "data": {
+      "title": "Data Management",
+      "description": "Export and import consultation information",
+      "import": "आयात करा",
+      "export": "निर्यात करा"
+    },
+    "no_permissions": {
+      "title": "No permissions available",
+      "description": "You do not have permissions to access any section of the agenda. Contact the administrator."
+    },
+    "actions": {
+      "reserve": "Reserve"
+    },
+    "status": {
+      "blocked": "Blocked",
+      "reservation": "Booking",
+      "booked": "Booked",
+      "cancelled": "Cancelled",
+      "unknown": "Booked"
+    },
+    "messages": {
+      "no_resources": "No resources configured.",
+      "no_reservations": "No bookings for the date.",
+      "no_availability": "No availability for this day.",
+      "create_error": "Error creating booking",
+      "select_resource_week": "Select a resource and date to view the week.",
+      "missing_ids": "Cannot save description: missing PK/SK for the event",
+      "save_description_error": "Error saving description",
+      "cancel_missing_ids": "Cannot cancel: missing PK/SK for the event",
+      "cancel_error": "Error cancelling",
+      "select_resource": "Select a resource",
+      "select_resource_first": "Select a resource first",
+      "recurrent_days_missing": "Select at least one day and times for recurrence",
+      "date_range_required": "Fill start and end dates",
+      "date_range_invalid": "End date must be >= start date",
+      "recurrent_created": "Recurring bookings created",
+      "conflict_cancelled": "Operation cancelled due to conflict",
+      "recurrent_created_with_conflicts": "Recurring bookings created (conflicts ignored)",
+      "required_fields": "Complete date, time and duration",
+      "duration_invalid": "Duration must be greater than 0",
+      "created": "Booking created",
+      "conflict_prompt": "Date conflicts: {{conflicts}}\nIf you continue, conflicting dates will be skipped and the rest created.\nDo you want to continue?",
+      "week_instruction": "Select a resource to view the weekly calendar.",
+      "no_resources_error": "Error loading resources",
+      "cancel_booking_confirm": "Cancel this booking?",
+      "no_detail": "no detail",
+      "dev_title": "In Development",
+      "dev_body": "Interface in development, available soon."
+    },
+    "placeholders": {
+      "scheduled_for": "Person/client",
+      "worker": "Professional",
+      "notes": "Booking notes"
+    }
+  },
   "font_scales": {
     "small": "लहान",
     "medium": "मध्यम",
@@ -73,10 +262,13 @@
   "navbar": {
     "dashboard": "डॅशबोर्ड",
     "agenda": "वेळापत्रक",
-    "box": "खोली",
+    "resources": "Resource management",
     "notifications": "सूचना",
     "profile": "प्रोफाइल",
-    "logout": "लॉगआउट"
+    "logout": "लॉगआउट",
+    "doctors": "Doctors",
+    "toggle": "Open navigation menu",
+    "box": "खोली"
   },
   "box": {
     "title": "खोलीची स्थिती",
@@ -103,7 +295,7 @@
     "corridor_prefix": "Corridor {{count}}"
   },
   "footer": {
-    "copyright": "© 2025 Incodefy. Medical Agenda System - All rights reserved."
+    "copyright": "© 2025 MASFI. Medical Agenda System - All rights reserved."
   },
   "login": {
     "title": "लॉगिन",
@@ -113,42 +305,6 @@
     "forgot_password": "Forgot your password?",
     "login_button": "लॉगिन",
     "show_password": "Show password"
-  },
-  "dashboard": {
-    "title": "Administration Dashboard",
-    "header": "Administration Dashboard",
-    "subheader": "Real-time metrics and notifications panel",
-    "filters": {
-      "date_range": "Date range",
-      "from": "From",
-      "to": "To",
-      "specialties": "विशेषज्ञता",
-      "select_all": "Select All",
-      "boxes": "खोल्या",
-      "reset": "Reset"
-    },
-    "kpi": {
-      "title": "Key Indicators",
-      "occupation": "Box occupation",
-      "total_appointments": "Total appointments",
-      "daily_average": "Daily average",
-      "most_demanded_specialty": "Most demanded specialty",
-      "days_in_period_one": "In {{count}} day",
-      "days_in_period_other": "In {{count}} days",
-      "total_capacity": "Total capacity: {{count}} boxes",
-      "appointments_per_day": "Appointments per day",
-      "appointments_count_one": "{{count}} appointment",
-      "appointments_count_other": "{{count}} appointments"
-    },
-    "charts": {
-      "title": "Visual Analysis",
-      "appointments_by_specialty": "Appointments by Specialty",
-      "appointments_by_day": "Appointments by Day",
-      "doctor_performance": "Doctor Performance",
-      "no_data": "No data",
-      "no_data_desc": "Apply filters to view the KPI"
-    },
-    "loading": "Loading data..."
   },
   "specialties": {
     "cardiologia": "हृदयरोगशास्त्र",
@@ -166,27 +322,6 @@
     "friday": "शुक्रवार",
     "saturday": "शनिवार",
     "sunday": "रविवार"
-  },
-  "agenda": {
-    "title": "कार्यसूची",
-    "main_title": "Agenda System",
-    "main_subtitle": "Manage your medical agenda efficiently",
-    "management": {
-      "title": "Agenda Management",
-      "description": "View and manage your medical appointments",
-      "box": "खोली",
-      "doctor": "डॉक्टर"
-    },
-    "data": {
-      "title": "Data Management",
-      "description": "Export and import consultation information",
-      "import": "आयात करा",
-      "export": "निर्यात करा"
-    },
-    "no_permissions": {
-      "title": "No permissions available",
-      "description": "You do not have permissions to access any section of the agenda. Contact the administrator."
-    }
   },
   "in_progress": {
     "title": "Appointments in Progress",
@@ -354,6 +489,80 @@
     "doctor": "डॉक्टर",
     "box": "खोली",
     "unknown_doctor": "Unknown doctor",
-    "unknown_box": "Unknown box"
+    "unknown_box": "Unknown box",
+    "consult_time": "Hour",
+    "type": "Consult Type",
+    "location": "Location",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "admin_rotations": {
+    "title": "Rotation Management",
+    "form_title": "Assign Role to User",
+    "role_label": "Role",
+    "assign_button": "Assign Role"
+  },
+  "dashboard_admin": {
+    "title": "Administration Dashboard",
+    "header": "Administration Dashboard",
+    "subheader": "Real-time metrics and notifications panel",
+    "filters": {
+      "date_range": "Date range",
+      "from": "From",
+      "to": "To",
+      "specialties": "Specialties",
+      "select_all": "Select All",
+      "boxes": "Boxes",
+      "reset": "Reset"
+    },
+    "kpi": {
+      "title": "Key Indicators",
+      "occupation": "Box occupation",
+      "total_appointments": "Total appointments",
+      "daily_average": "Daily average",
+      "most_demanded_specialty": "Most demanded specialty",
+      "days_in_period_one": "In {{count}} day",
+      "days_in_period_other": "In {{count}} days",
+      "total_capacity": "Total capacity: {{count}} boxes",
+      "appointments_per_day": "Appointments per day",
+      "appointments_count_one": "{{count}} appointment",
+      "appointments_count_other": "{{count}} appointments"
+    },
+    "charts": {
+      "title": "Visual Analysis",
+      "appointments_by_specialty": "Appointments by Specialty",
+      "appointments_by_day": "Appointments by Day",
+      "doctor_performance": "Doctor Performance",
+      "no_data": "No data",
+      "no_data_desc": "Apply filters to view the KPI"
+    },
+    "loading": "Loading data..."
+  },
+  "days_short": {
+    "monday": "Mon",
+    "tuesday": "Tue",
+    "wednesday": "Wed",
+    "thursday": "Thu",
+    "friday": "Fri",
+    "saturday": "Sat",
+    "sunday": "Sun"
+  },
+  "tenant_deletion": {
+    "title": "Company deleted successfully",
+    "lead": "All tenant information was deleted correctly:",
+    "items": {
+      "users": "Users removed from the system",
+      "roles": "Roles and permissions removed",
+      "personalization": "Personalization parameters deleted",
+      "branding": "Branding files removed from S3",
+      "catalog": "Catalog records removed"
+    },
+    "redirecting": "Redirecting in {{seconds}} seconds…",
+    "button": "Back to sign in",
+    "warning_lead": "This action will delete the entire company (tenant), including:",
+    "irreversible": "This action is irreversible.",
+    "confirm": "Are you sure you want to delete the entire company? This action cannot be undone.",
+    "button_delete": "Permanently delete company",
+    "delete_title": "Delete company"
   }
 }

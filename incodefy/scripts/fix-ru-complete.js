@@ -52,7 +52,7 @@ const ruTranslations = {
   'Corridor {{count}}': 'Коридор {{count}}',
   
   // Footer
-  '© 2025 Incodefy. Medical Agenda System - All rights reserved.': '© 2025 Incodefy. Система медицинской повестки - Все права защищены.',
+  '© 2025 MASFI. Medical Agenda System - All rights reserved.': '© 2025 MASFI. Система медицинской повестки - Все права защищены.',
   
   // Login
   'Remember me': 'Запомнить меня',

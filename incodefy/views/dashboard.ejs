@@ -15,13 +15,18 @@
   <% const brandingSource = (typeof personalization !== 'undefined' && personalization) ? personalization : (locals && locals.personalization ? locals.personalization : null); %>
   <% const branding = (brandingSource && brandingSource.branding) ? brandingSource.branding : {}; %>
   <% const brandingIcons = (branding && branding.icons) ? branding.icons : {}; %>
+  <% const brandName = (branding && branding.name) ? branding.name : 'MASFI'; %>
   <div class="container-fluid">
     <div class="row">
       <%- include('navbar') %>
       <div class="main">
         <div class="header-section">
           <h1>
-            <img src="<%= branding.logo || '/logos/logo_hospital.png' %>" class="brand-logo me-2 header-icon" alt="Branding logo">
+            <% if (branding && branding.logo) { %>
+              <img src="<%= branding.logo %>" class="brand-logo me-2 header-icon" alt="<%= brandName %>">
+            <% } else { %>
+              <span class="brand-text me-2 header-icon"><%= brandName %></span>
+            <% } %>
             <%= t('dashboard.title', 'Panel de Agendamientos') %>
           </h1>
           <p><%= t('dashboard.subtitle', 'Vista consolidada de reservas, bloqueos y uso de recursos') %></p>
@@ -122,6 +127,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    const dashboardText = {
+      loadError: "<%= t('dashboard.messages.load_error', 'Error cargando dashboard') %>"
+    };
     let chartDia, chartTipo, chartUbic;
 
     function fillSelect(id, values, label) {
@@ -201,7 +209,7 @@
         renderChart('chartTipo', data.charts?.reservasPorTipo || { labels: [], data: [] }, "<%= t('dashboard.charts.byType', 'Reservas por tipo de recurso') %>");
         renderChart('chartUbic', data.charts?.reservasPorUbicacion || { labels: [], data: [] }, "<%= t('dashboard.charts.byLocation', 'Reservas por ubicación') %>");
       } catch (e) {
-        console.error('Error cargando dashboard agenda', e);
+        console.error(dashboardText.loadError, e);
       }
     }
 

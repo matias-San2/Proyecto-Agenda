@@ -9,9 +9,9 @@
 <body>
   <div class="wrapper setup-wrapper">
     <div class="login-box setup-box">
-      <form action="/setup/create-admin" method="POST" enctype="multipart/form-data" class="setup-form">
+      <form action="/setup/create-admin" method="POST" class="setup-form">
         <h2>Configuración Inicial</h2>
-        <p class="setup-subtitle">Completa los datos para personalizar tu cuenta y tu marca.</p>
+        <p class="setup-subtitle">Completa los datos para personalizar tu cuenta.</p>
 
         <div class="setup-columns">
           <div class="setup-column">
@@ -55,23 +55,12 @@
                 </ul>
               </div>
 
-              <div class="upload-grid">
-                <div class="upload-card">
-                  <label>Foto de perfil</label>
-                  <small>Formatos: PNG, JPG. Máx 5MB.</small>
-                  <input type="file" name="profilePhoto" id="profilePhotoInput" accept=".png,.jpg,.jpeg">
-                  <div class="image-preview">
-                    <img id="profilePreview" class="hidden" alt="Previsualización de foto de perfil">
-                    <span id="profilePreviewText">Sin previsualización</span>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
 
           <div class="setup-column">
             <h3>Datos de la empresa</h3>
-            <p>Personaliza la información y elementos visuales de tu organización.</p>
+            <p>Información básica de tu organización.</p>
             <div class="setup-grid single-column">
               <div class="input-box">
                 <span class="icon"><i class="fa-solid fa-building"></i></span>
@@ -83,41 +72,6 @@
                 <span class="icon"><i class="fa-solid fa-id-card"></i></span>
                 <input type="text" name="companyId" required>
                 <label>RUT / Razón social</label>
-              </div>
-
-              <div class="input-box">
-                <span class="icon"><i class="fa-solid fa-briefcase"></i></span>
-                <select name="industry" required>
-                  <option value="" disabled selected hidden></option>
-                  <option value="hospital">Hospital</option>
-                  <option value="hotel">Hotel</option>
-                  <option value="deportes">Deportes</option>
-                </select>
-                <label>Rubro</label>
-              </div>
-
-              <div class="upload-grid">
-                <div class="upload-card">
-                  <label>Logo de la empresa</label>
-                  <small>Formatos: PNG, JPG, SVG. Máx 5MB.</small>
-                  <input type="file" name="companyLogo" id="companyLogoInput" accept=".png,.jpg,.jpeg,.svg">
-                  <div class="image-preview">
-                    <img id="logoPreview" class="hidden" alt="Previsualización del logo">
-                    <span id="logoPreviewText">Sin previsualización</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="preview-card">
-                <h3><i class="fa-solid fa-eye"></i> Preview de nomenclaturas</h3>
-                <p>Así verás los nombres de los espacios dentro del sistema.</p>
-                <div class="preview-badges">
-                  <span>Sala</span>
-                  <span>Box</span>
-                  <span>Cancha</span>
-                  <span>Cuarto</span>
-                  <span>Habitación</span>
-                </div>
               </div>
             </div>
           </div>
@@ -132,12 +86,6 @@
       const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
       const passwordInput = document.getElementById('setupPassword');
       const confirmInput = document.getElementById('setupPasswordConfirm');
-      const profileInput = document.getElementById('profilePhotoInput');
-      const companyLogoInput = document.getElementById('companyLogoInput');
-      const profilePreview = document.getElementById('profilePreview');
-      const profilePreviewText = document.getElementById('profilePreviewText');
-      const logoPreview = document.getElementById('logoPreview');
-      const logoPreviewText = document.getElementById('logoPreviewText');
 
       function togglePasswordVisibility(icon) {
         const targetId = icon.dataset.target;
@@ -211,28 +159,6 @@
         field.addEventListener('blur', () => updateFloatingLabelState(field));
       });
 
-      function attachImagePreview(input, imgElement, textElement) {
-        if (!input || !imgElement || !textElement) return;
-        input.addEventListener('change', event => {
-          const file = event.target.files && event.target.files[0];
-          if (!file) {
-            imgElement.classList.add('hidden');
-            textElement.textContent = 'Sin previsualización';
-            imgElement.removeAttribute('src');
-            return;
-          }
-          const reader = new FileReader();
-          reader.onload = ev => {
-            imgElement.src = ev.target.result;
-            imgElement.classList.remove('hidden');
-            textElement.textContent = file.name;
-          };
-          reader.readAsDataURL(file);
-        });
-      }
-
-      attachImagePreview(profileInput, profilePreview, profilePreviewText);
-      attachImagePreview(companyLogoInput, logoPreview, logoPreviewText);
     })();
   </script>
 </body>

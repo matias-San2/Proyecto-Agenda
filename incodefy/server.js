@@ -175,6 +175,15 @@ app.use('/', requireAuth, calendarioRouter);
 const adminRoutes = require('./routes/admin');
 app.use('/admin', requireAuth, adminRoutes);
 
+// Sanitizador de personalización para evitar claves no soportadas por backend
+function sanitizePersonalization(params = {}) {
+  if (!params || typeof params !== 'object') return {};
+  const clone = { ...params };
+  delete clone['theme.primary_color_light'];
+  delete clone['theme.primary_color_dark'];
+  return clone;
+}
+
 // Perfil
 app.get('/perfil', requireAuth, (req, res) => {
   const localesDir = path.join(__dirname, 'locales');
@@ -196,7 +205,7 @@ app.get('/perfil', requireAuth, (req, res) => {
 });
 
 app.post('/perfil', requireAuth, (req, res) => {
-  const personalization = req.session.personalization || {};
+  const personalization = sanitizePersonalization(req.session.personalization || {});
   const mode = req.body['theme.mode'];
   const primary = req.body['theme.primary_color'];
   const fontScale = req.body['font.scale'];
@@ -208,28 +217,15 @@ app.post('/perfil', requireAuth, (req, res) => {
   if (lang) {
     req.session.lang = lang;
     req.session.language = lang;
+    personalization['locale.language'] = lang;
     if (req.i18n) {
       try { req.i18n.changeLanguage(lang); } catch (_) {}
     }
   }
 
-  req.session.personalization = personalization;
+  req.session.personalization = sanitizePersonalization(personalization);
   if (req.session.user) {
-    req.session.user.personalization = personalization;
-  }
-
-  // Persistencia en cookies para futuras sesiones
-  res.cookie('personalization', JSON.stringify(personalization), {
-    maxAge: 30 * 24 * 60 * 60 * 1000,
-    httpOnly: false,
-    sameSite: 'lax'
-  });
-  if (lang) {
-    res.cookie('lang', lang, {
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      httpOnly: false,
-      sameSite: 'lax'
-    });
+    req.session.user.personalization = req.session.personalization;
   }
 
   req.session.save(async err => {
@@ -248,7 +244,7 @@ app.post('/perfil', requireAuth, (req, res) => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            parameters: personalization,
+            parameters: sanitizePersonalization(personalization),
             empresaId: req.session.user?.empresaId,
             userSub: req.session.user?.sub
           })
@@ -256,8 +252,16 @@ app.post('/perfil', requireAuth, (req, res) => {
         if (resp.ok) {
           const data = await resp.json().catch(() => ({}));
           if (data.final_parameters) {
-            req.session.personalization = data.final_parameters;
-            if (req.session.user) req.session.user.personalization = data.final_parameters;
+            req.session.personalization = sanitizePersonalization(data.final_parameters);
+            if (req.session.user) req.session.user.personalization = req.session.personalization;
+            const newLang = data.final_parameters['locale.language'];
+            if (newLang && typeof newLang === 'string') {
+              req.session.lang = newLang;
+              req.session.language = newLang;
+              if (req.i18n) {
+                try { req.i18n.changeLanguage(newLang); } catch (_) {}
+              }
+            }
           }
         } else {
           const txt = await resp.text();
@@ -298,7 +302,7 @@ app.post('/api/personalization', requireAuth, async (req, res) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        parameters: req.body.parameters
+        parameters: sanitizePersonalization(req.body.parameters || {})
       })
     });
 

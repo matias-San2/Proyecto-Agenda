@@ -149,25 +149,25 @@
   </div>
 <% if (user && (user.role === 'admin' || user.role === 'superadmin')) { %>
   <div class="form-section mt-5">
-    <h4 class="text-danger"><i class="fas fa-exclamation-triangle"></i> Eliminar empresa</h4>
+    <h4 class="text-danger"><i class="fas fa-exclamation-triangle"></i> <%= t('tenant_deletion.delete_title', 'Eliminar empresa') %></h4>
     <p class="text-muted">
-      Esta acción eliminará <strong>toda la empresa (tenant)</strong>, incluyendo:
+      <%= t('tenant_deletion.warning_lead', 'Esta acción eliminará toda la empresa (tenant), incluyendo:') %>
     </p>
     <ul>
-      <li>Todos los usuarios</li>
-      <li>Todos los roles y permisos</li>
-      <li>Todos los parámetros de personalización</li>
-      <li>Todos los archivos (branding, logos, íconos)</li>
-      <li>Todos los registros de catálogo asociados</li>
+      <li><%= t('tenant_deletion.items.users', 'Usuarios removidos del sistema') %></li>
+      <li><%= t('tenant_deletion.items.roles', 'Roles y permisos eliminados') %></li>
+      <li><%= t('tenant_deletion.items.personalization', 'Parámetros de personalización borrados') %></li>
+      <li><%= t('tenant_deletion.items.branding', 'Archivos de branding eliminados de S3') %></li>
+      <li><%= t('tenant_deletion.items.catalog', 'Registros del catálogo asociados eliminados') %></li>
     </ul>
 
     <p class="text-danger fw-bold">
-      Esta acción es irreversible.
+      <%= t('tenant_deletion.irreversible', 'Esta acción es irreversible.') %>
     </p>
 
-    <form action="/admin/tenant/<%= personalization?.empresaId || user?.empresaId %>?_method=DELETE" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar toda la empresa? Esta acción no se puede deshacer.')">
+    <form action="/admin/tenant/<%= personalization?.empresaId || user?.empresaId %>?_method=DELETE" method="POST" onsubmit="return confirm('<%= t('tenant_deletion.confirm', '¿Estás seguro de eliminar toda la empresa? Esta acción no se puede deshacer.') %>')">
       <button class="btn btn-danger w-100 mt-2" type="submit">
-        <i class="fas fa-trash"></i> Eliminar empresa definitivamente
+        <i class="fas fa-trash"></i> <%= t('tenant_deletion.button_delete', 'Eliminar empresa definitivamente') %>
       </button>
     </form>
   </div>

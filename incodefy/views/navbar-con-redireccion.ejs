@@ -1,13 +1,18 @@
 <% const brandingSource = (typeof personalization !== 'undefined' && personalization) ? personalization : (locals && locals.personalization ? locals.personalization : null); %>
 <% const branding = (brandingSource && brandingSource.branding) ? brandingSource.branding : {}; %>
+<% const brandName = (branding && branding.name) ? branding.name : 'MASFI'; %>
 <nav class="custom-navbar">
-  <div class="navbar-toggle" onclick="toggleNavbar()" aria-label="Abrir menú de navegación">
+  <div class="navbar-toggle" onclick="toggleNavbar()" aria-label="<%= t('navbar.toggle', 'Abrir menú de navegación') %>">
     <i class="fas fa-bars"></i>
   </div>
   
   <div class="navbar-title">
     <a class="logo" href="/">
-      <img src="<%= branding.logo || '/logos/logo_hospital.png' %>" class="brand-logo" alt="Home">
+      <% if (branding && branding.logo) { %>
+        <img src="<%= branding.logo %>" class="brand-logo" alt="<%= brandName %>">
+      <% } else { %>
+        <span class="brand-text"><%= brandName %></span>
+      <% } %>
     </a>
   </div>
 
@@ -16,35 +21,35 @@
 
   <ul class="navbar-menu">
     <li>
-      <a href="/dashboard" class="menu-link <%= currentPath === '/dashboard' ? 'active' : '' %>" data-tooltip="Dashboard">
+      <a href="/dashboard" class="menu-link <%= currentPath === '/dashboard' ? 'active' : '' %>" data-tooltip="<%= t('navbar.dashboard', 'Panel') %>">
         <img src="<%= (branding.icons && branding.icons.agenda) || '/icons/dashboard.webp' %>" class="icon" alt="">
-        <span>Dashboard</span>
+        <span><%= t('navbar.dashboard', 'Panel') %></span>
       </a>
     </li>
     <li>
-      <a href="/agendamientos" class="menu-link <%= currentPath === '/agendamientos' ? 'active' : '' %>" data-tooltip="Agendamientos">
+      <a href="/agendamientos" class="menu-link <%= currentPath === '/agendamientos' ? 'active' : '' %>" data-tooltip="<%= t('navbar.agenda', 'Agendamientos') %>">
         <img src="<%= (branding.icons && branding.icons.agenda) || '/icons/calendario.webp' %>" class="icon" alt="">
-        <span>Agendamientos</span>
+        <span><%= t('navbar.agenda', 'Agendamientos') %></span>
       </a>
     </li>
     <li>
     </li>
     <li>
-      <a href="/medicos" class="menu-link <%= currentPath === '/medicos' ? 'active' : '' %>" data-tooltip="Médicos">
+      <a href="/medicos" class="menu-link <%= currentPath === '/medicos' ? 'active' : '' %>" data-tooltip="<%= t('navbar.doctors', 'Médicos') %>">
         <img src="/icons/doctor.png" alt="">
-        <span>Médicos</span>
+        <span><%= t('navbar.doctors', 'Médicos') %></span>
       </a>
     </li>
     <li>
-      <a href="/notificaciones" class="menu-link <%= currentPath === '/notificaciones' ? 'active' : '' %>" data-tooltip="Notificaciones">
+      <a href="/notificaciones" class="menu-link <%= currentPath === '/notificaciones' ? 'active' : '' %>" data-tooltip="<%= t('navbar.notifications', 'Notificaciones') %>">
         <img src="/icons/notificaciones.webp" alt="" class="noti">
-        <span>Notificaciones</span>
+        <span><%= t('navbar.notifications', 'Notificaciones') %></span>
       </a>
     </li>
     <li>
       <form action="/logout" method="post">
         <button type="submit" class="logout-button">
-          <span>Cerrar sesión</span>
+          <span><%= t('navbar.logout', 'Cerrar Sesión') %></span>
         </button>
       </form>
     </li>

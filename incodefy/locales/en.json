@@ -76,7 +76,9 @@
     "resources": "Resource management",
     "notifications": "Notifications",
     "profile": "Profile",
-    "logout": "Logout"
+    "logout": "Logout",
+    "doctors": "Doctors",
+    "toggle": "Open navigation menu"
   },
   "dashboard": {
     "title": "Scheduling Panel",
@@ -107,6 +109,9 @@
       "byDay": "Bookings per day",
       "byType": "Bookings by resource type",
       "byLocation": "Bookings by location"
+    },
+    "messages": {
+      "load_error": "Error loading dashboard"
     }
   },
   "resources": {
@@ -136,6 +141,14 @@
       "building": "Building/Wing",
       "zone": "Zone/Corridor",
       "loading": "Loading resources..."
+    },
+    "block": {
+      "title": "Block resource",
+      "date_required": "Enter start and end dates",
+      "error": "Error blocking resource",
+      "description": "Description",
+      "reason_placeholder": "Blocking reason",
+      "confirm": "Confirm block"
     }
   },
   "resources.labels": {
@@ -190,7 +203,70 @@
       "agendado": "Booked for (optional)",
       "worker": "Assigned worker (optional)",
       "description": "Description (optional)",
-      "create": "Create"
+      "create": "Create",
+      "end": "End time"
+    },
+    "main_title": "Agenda System",
+    "main_subtitle": "Manage your medical agenda efficiently",
+    "management": {
+      "title": "Agenda Management",
+      "description": "View and manage your medical appointments",
+      "box": "Box",
+      "doctor": "Doctor"
+    },
+    "data": {
+      "title": "Data Management",
+      "description": "Export and import consultation information",
+      "import": "Import",
+      "export": "Export"
+    },
+    "no_permissions": {
+      "title": "No permissions available",
+      "description": "You do not have permissions to access any section of the agenda. Contact the administrator."
+    },
+    "actions": {
+      "reserve": "Reserve"
+    },
+    "status": {
+      "blocked": "Blocked",
+      "reservation": "Booking",
+      "booked": "Booked",
+      "cancelled": "Cancelled",
+      "unknown": "Booked"
+    },
+    "messages": {
+      "no_resources": "No resources configured.",
+      "no_reservations": "No bookings for the date.",
+      "no_availability": "No availability for this day.",
+      "create_error": "Error creating booking",
+      "select_resource_week": "Select a resource and date to view the week.",
+      "missing_ids": "Cannot save description: missing PK/SK for the event",
+      "save_description_error": "Error saving description",
+      "cancel_missing_ids": "Cannot cancel: missing PK/SK for the event",
+      "cancel_error": "Error cancelling",
+      "select_resource": "Select a resource",
+      "select_resource_first": "Select a resource first",
+      "recurrent_days_missing": "Select at least one day and times for recurrence",
+      "date_range_required": "Fill start and end dates",
+      "date_range_invalid": "End date must be >= start date",
+      "recurrent_created": "Recurring bookings created",
+      "conflict_cancelled": "Operation cancelled due to conflict",
+      "recurrent_created_with_conflicts": "Recurring bookings created (conflicts ignored)",
+      "required_fields": "Complete date, time and duration",
+      "duration_invalid": "Duration must be greater than 0",
+      "created": "Booking created",
+      "conflict_prompt": "Date conflicts: {{conflicts}}\nIf you continue, conflicting dates will be skipped and the rest created.\nDo you want to continue?",
+      "week_instruction": "Select a resource to view the weekly calendar.",
+      "no_resources_error": "Error loading resources",
+      "cancel_booking_confirm": "Cancel this booking?",
+      "no_detail": "no detail",
+      "dev_title": "In Development",
+      "dev_body": "Interface in development, available soon."
+    },
+    "placeholders": {
+      "scheduled_for": "Person/client",
+      "worker": "Professional",
+      "notes": "Booking notes"
     }
   },
   "box": {
@@ -218,7 +294,7 @@
     "corridor_prefix": "Corridor {{count}}"
   },
   "footer": {
-    "copyright": "© 2025 Incodefy. Medical Agenda System - All rights reserved."
+    "copyright": "© 2025 MASFI. Medical Agenda System - All rights reserved."
   },
   "login": {
     "title": "Login",
@@ -228,42 +304,6 @@
     "forgot_password": "Forgot your password?",
     "login_button": "Login",
     "show_password": "Show password"
-  },
-  "dashboard": {
-    "title": "Administration Dashboard",
-    "header": "Administration Dashboard",
-    "subheader": "Real-time metrics and notifications panel",
-    "filters": {
-      "date_range": "Date range",
-      "from": "From",
-      "to": "To",
-      "specialties": "Specialties",
-      "select_all": "Select All",
-      "boxes": "Boxes",
-      "reset": "Reset"
-    },
-    "kpi": {
-      "title": "Key Indicators",
-      "occupation": "Box occupation",
-      "total_appointments": "Total appointments",
-      "daily_average": "Daily average",
-      "most_demanded_specialty": "Most demanded specialty",
-      "days_in_period_one": "In {{count}} day",
-      "days_in_period_other": "In {{count}} days",
-      "total_capacity": "Total capacity: {{count}} boxes",
-      "appointments_per_day": "Appointments per day",
-      "appointments_count_one": "{{count}} appointment",
-      "appointments_count_other": "{{count}} appointments"
-    },
-    "charts": {
-      "title": "Visual Analysis",
-      "appointments_by_specialty": "Appointments by Specialty",
-      "appointments_by_day": "Appointments by Day",
-      "doctor_performance": "Doctor Performance",
-      "no_data": "No data",
-      "no_data_desc": "Apply filters to view the KPI"
-    },
-    "loading": "Loading data..."
   },
   "specialties": {
     "cardiologia": "Cardiology",
@@ -281,27 +321,6 @@
     "friday": "Friday",
     "saturday": "Saturday",
     "sunday": "Sunday"
-  },
-  "agenda": {
-    "title": "Agenda",
-    "main_title": "Agenda System",
-    "main_subtitle": "Manage your medical agenda efficiently",
-    "management": {
-      "title": "Agenda Management",
-      "description": "View and manage your medical appointments",
-      "box": "Box",
-      "doctor": "Doctor"
-    },
-    "data": {
-      "title": "Data Management",
-      "description": "Export and import consultation information",
-      "import": "Import",
-      "export": "Export"
-    },
-    "no_permissions": {
-      "title": "No permissions available",
-      "description": "You do not have permissions to access any section of the agenda. Contact the administrator."
-    }
   },
   "in_progress": {
     "title": "Appointments in Progress",
@@ -401,7 +420,7 @@
     "medical": "Medical",
     "non_medical": "Non-medical",
     "confirm_appointment": "Confirm Appointment",
-  "unconfirm_appointment": "Unconfirm",
+    "unconfirm_appointment": "Unconfirm",
     "appointments": "Appointments",
     "appointments_management": "Appointments Management",
     "appointments_management_desc": "View and manage your medical appointments",
@@ -471,6 +490,78 @@
     "unknown_doctor": "Unknown doctor",
     "unknown_box": "Unknown box",
     "consult_time": "Hour",
-    "type": "Consult Type"
+    "type": "Consult Type",
+    "location": "Location",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "admin_rotations": {
+    "title": "Rotation Management",
+    "form_title": "Assign Role to User",
+    "role_label": "Role",
+    "assign_button": "Assign Role"
+  },
+  "dashboard_admin": {
+    "title": "Administration Dashboard",
+    "header": "Administration Dashboard",
+    "subheader": "Real-time metrics and notifications panel",
+    "filters": {
+      "date_range": "Date range",
+      "from": "From",
+      "to": "To",
+      "specialties": "Specialties",
+      "select_all": "Select All",
+      "boxes": "Boxes",
+      "reset": "Reset"
+    },
+    "kpi": {
+      "title": "Key Indicators",
+      "occupation": "Box occupation",
+      "total_appointments": "Total appointments",
+      "daily_average": "Daily average",
+      "most_demanded_specialty": "Most demanded specialty",
+      "days_in_period_one": "In {{count}} day",
+      "days_in_period_other": "In {{count}} days",
+      "total_capacity": "Total capacity: {{count}} boxes",
+      "appointments_per_day": "Appointments per day",
+      "appointments_count_one": "{{count}} appointment",
+      "appointments_count_other": "{{count}} appointments"
+    },
+    "charts": {
+      "title": "Visual Analysis",
+      "appointments_by_specialty": "Appointments by Specialty",
+      "appointments_by_day": "Appointments by Day",
+      "doctor_performance": "Doctor Performance",
+      "no_data": "No data",
+      "no_data_desc": "Apply filters to view the KPI"
+    },
+    "loading": "Loading data..."
+  },
+  "days_short": {
+    "monday": "Mon",
+    "tuesday": "Tue",
+    "wednesday": "Wed",
+    "thursday": "Thu",
+    "friday": "Fri",
+    "saturday": "Sat",
+    "sunday": "Sun"
+  },
+  "tenant_deletion": {
+    "title": "Company deleted successfully",
+    "lead": "All tenant information was deleted correctly:",
+    "items": {
+      "users": "Users removed from the system",
+      "roles": "Roles and permissions removed",
+      "personalization": "Personalization parameters deleted",
+      "branding": "Branding files removed from S3",
+      "catalog": "Catalog records removed"
+    },
+    "redirecting": "Redirecting in {{seconds}} seconds…",
+    "button": "Back to sign in",
+    "warning_lead": "This action will delete the entire company (tenant), including:",
+    "irreversible": "This action is irreversible.",
+    "confirm": "Are you sure you want to delete the entire company? This action cannot be undone.",
+    "button_delete": "Permanently delete company",
+    "delete_title": "Delete company"
   }
 }

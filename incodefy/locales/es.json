@@ -35,6 +35,9 @@
       "byDay": "Reservas por día",
       "byType": "Reservas por tipo de recurso",
       "byLocation": "Reservas por ubicación"
+    },
+    "messages": {
+      "load_error": "Error cargando dashboard"
     }
   },
   "resources": {
@@ -64,6 +67,14 @@
       "building": "Edificio/Pabellón",
       "zone": "Zona/Pasillo",
       "loading": "Cargando recursos..."
+    },
+    "block": {
+      "title": "Bloquear recurso",
+      "date_required": "Ingresa fechas de inicio y término",
+      "error": "Error bloqueando recurso",
+      "description": "Descripción",
+      "reason_placeholder": "Motivo del bloqueo",
+      "confirm": "Confirmar bloqueo"
     }
   },
   "resources.labels": {
@@ -118,7 +129,70 @@
       "agendado": "Agendado (opcional)",
       "worker": "Trabajador asignado (opcional)",
       "description": "Descripción (opcional)",
-      "create": "Crear"
+      "create": "Crear",
+      "end": "Hora término"
+    },
+    "main_title": "Sistema de Agenda",
+    "main_subtitle": "Gestiona tu agenda médica de forma eficiente",
+    "management": {
+      "title": "Gestión de Agenda",
+      "description": "Visualiza y administra tus citas médicas",
+      "box": "Box",
+      "doctor": "Médico"
+    },
+    "data": {
+      "title": "Gestión de Datos",
+      "description": "Exporta e importa información de consultas",
+      "import": "Importar",
+      "export": "Exportar"
+    },
+    "no_permissions": {
+      "title": "Sin permisos disponibles",
+      "description": "No tienes permisos para acceder a ninguna sección de la agenda. Contacta al administrador."
+    },
+    "actions": {
+      "reserve": "Reservar"
+    },
+    "status": {
+      "blocked": "Bloqueado",
+      "reservation": "Reserva",
+      "booked": "Reservado",
+      "cancelled": "Cancelada",
+      "unknown": "Reservado"
+    },
+    "messages": {
+      "no_resources": "No hay recursos configurados.",
+      "no_reservations": "Sin reservas para la fecha.",
+      "no_availability": "No hay disponibilidad para este día.",
+      "create_error": "Error creando reserva",
+      "select_resource_week": "Selecciona un recurso y fecha para ver la semana.",
+      "missing_ids": "No se puede guardar descripción: falta PK/SK del evento",
+      "save_description_error": "Error guardando descripción",
+      "cancel_missing_ids": "No se puede cancelar: falta PK/SK del evento",
+      "cancel_error": "Error cancelando",
+      "select_resource": "Selecciona un recurso",
+      "select_resource_first": "Selecciona un recurso primero",
+      "recurrent_days_missing": "Selecciona al menos un día y horarios para recurrente",
+      "date_range_required": "Completa fecha de inicio y término",
+      "date_range_invalid": "La fecha de término debe ser >= inicio",
+      "recurrent_created": "Reservas recurrentes creadas",
+      "conflict_cancelled": "Operación cancelada por conflicto",
+      "recurrent_created_with_conflicts": "Reservas recurrentes creadas (conflictos ignorados)",
+      "required_fields": "Completa fecha, hora y duración",
+      "duration_invalid": "La duración debe ser mayor que 0",
+      "created": "Reserva creada",
+      "conflict_prompt": "Conflicto en fechas: {{conflicts}}\nSi aceptas se ignorarán las conflictivas y las demás se crearán.\n¿Quieres continuar?",
+      "week_instruction": "Selecciona un recurso para ver la vista semanal.",
+      "no_resources_error": "Error cargando recursos",
+      "cancel_booking_confirm": "¿Cancelar esta reserva?",
+      "no_detail": "sin detalle",
+      "dev_title": "En Desarrollo",
+      "dev_body": "Interfaz en desarrollo, próximamente se encontrará disponible."
+    },
+    "placeholders": {
+      "scheduled_for": "Persona/cliente",
+      "worker": "Profesional",
+      "notes": "Notas de la reserva"
     }
   },
   "font_scales": {
@@ -191,7 +265,9 @@
     "resources": "Administración de recursos",
     "notifications": "Notificaciones",
     "profile": "Perfil",
-    "logout": "Cerrar Sesión"
+    "logout": "Cerrar Sesión",
+    "doctors": "Médicos",
+    "toggle": "Abrir menú de navegación"
   },
   "box": {
     "title": "Estado de los Boxes",
@@ -218,7 +294,7 @@
     "corridor_prefix": "Pasillo {{count}}"
   },
   "footer": {
-    "copyright": "© 2025 Incodefy. Sistema de Agenda Médica - Todos los derechos reservados."
+    "copyright": "© 2025 MASFI. Sistema de Agenda Médica - Todos los derechos reservados."
   },
   "login": {
     "title": "Iniciar Sesión",
@@ -228,42 +304,6 @@
     "forgot_password": "¿Olvidaste tu contraseña?",
     "login_button": "Iniciar sesión",
     "show_password": "Mostrar contraseña"
-  },
-  "dashboard": {
-    "title": "Dashboard de Administración",
-    "header": "Dashboard de Administración",
-    "subheader": "Panel de métricas y notificaciones en tiempo real",
-    "filters": {
-      "date_range": "Rango fecha",
-      "from": "Desde",
-      "to": "Hasta",
-      "specialties": "Especialidades",
-      "select_all": "Seleccionar Todo",
-      "boxes": "Boxes",
-      "reset": "Resetear"
-    },
-    "kpi": {
-      "title": "Indicadores Clave",
-      "occupation": "Ocupación de boxes",
-      "total_appointments": "Total de consultas",
-      "daily_average": "Promedio diario",
-      "most_demanded_specialty": "Especialidad más demandada",
-      "days_in_period_one": "En {{count}} día",
-      "days_in_period_other": "En {{count}} días",
-      "total_capacity": "Capacidad total: {{count}} boxes",
-      "appointments_per_day": "Consultas por día",
-      "appointments_count_one": "{{count}} consulta",
-      "appointments_count_other": "{{count}} consultas"
-    },
-    "charts": {
-      "title": "Análisis Visual",
-      "appointments_by_specialty": "Consultas por Especialidad",
-      "appointments_by_day": "Consultas por Día",
-      "doctor_performance": "Rendimiento de Médicos",
-      "no_data": "Sin datos",
-      "no_data_desc": "Aplica filtros para ver el KPI"
-    },
-    "loading": "Cargando datos..."
   },
   "specialties": {
     "cardiologia": "Cardiología",
@@ -281,27 +321,6 @@
     "friday": "Viernes",
     "saturday": "Sábado",
     "sunday": "Domingo"
-  },
-  "agenda": {
-    "title": "Agenda",
-    "main_title": "Sistema de Agenda",
-    "main_subtitle": "Gestiona tu agenda médica de forma eficiente",
-    "management": {
-      "title": "Gestión de Agenda",
-      "description": "Visualiza y administra tus citas médicas",
-      "box": "Box",
-      "doctor": "Médico"
-    },
-    "data": {
-      "title": "Gestión de Datos",
-      "description": "Exporta e importa información de consultas",
-      "import": "Importar",
-      "export": "Exportar"
-    },
-    "no_permissions": {
-      "title": "Sin permisos disponibles",
-      "description": "No tienes permisos para acceder a ninguna sección de la agenda. Contacta al administrador."
-    }
   },
   "in_progress": {
     "title": "Consultas en Curso",
@@ -401,7 +420,7 @@
     "medical": "Médica",
     "non_medical": "No médico",
     "confirm_appointment": "Confirmar Cita",
-  "unconfirm_appointment": "Desconfirmar",
+    "unconfirm_appointment": "Desconfirmar",
     "appointments": "Citas",
     "appointments_management": "Gestión de Agenda",
     "appointments_management_desc": "Visualiza y administra tus citas médicas",
@@ -471,12 +490,78 @@
     "unknown_doctor": "Médico desconocido",
     "unknown_box": "Box desconocido",
     "consult_time": "Hora",
-    "type": "Tipo Consulta"
+    "type": "Tipo Consulta",
+    "location": "Ubicación",
+    "cancel": "Cancelar",
+    "save": "Guardar"
   },
   "admin_rotations": {
     "title": "Gestión de Rotaciones",
     "form_title": "Asignar Rol a Usuario",
     "role_label": "Rol",
     "assign_button": "Asignar Rol"
+  },
+  "dashboard_admin": {
+    "title": "Dashboard de Administración",
+    "header": "Dashboard de Administración",
+    "subheader": "Panel de métricas y notificaciones en tiempo real",
+    "filters": {
+      "date_range": "Rango fecha",
+      "from": "Desde",
+      "to": "Hasta",
+      "specialties": "Especialidades",
+      "select_all": "Seleccionar Todo",
+      "boxes": "Boxes",
+      "reset": "Resetear"
+    },
+    "kpi": {
+      "title": "Indicadores Clave",
+      "occupation": "Ocupación de boxes",
+      "total_appointments": "Total de consultas",
+      "daily_average": "Promedio diario",
+      "most_demanded_specialty": "Especialidad más demandada",
+      "days_in_period_one": "En {{count}} día",
+      "days_in_period_other": "En {{count}} días",
+      "total_capacity": "Capacidad total: {{count}} boxes",
+      "appointments_per_day": "Consultas por día",
+      "appointments_count_one": "{{count}} consulta",
+      "appointments_count_other": "{{count}} consultas"
+    },
+    "charts": {
+      "title": "Análisis Visual",
+      "appointments_by_specialty": "Consultas por Especialidad",
+      "appointments_by_day": "Consultas por Día",
+      "doctor_performance": "Rendimiento de Médicos",
+      "no_data": "Sin datos",
+      "no_data_desc": "Aplica filtros para ver el KPI"
+    },
+    "loading": "Cargando datos..."
+  },
+  "days_short": {
+    "monday": "Lun",
+    "tuesday": "Mar",
+    "wednesday": "Mié",
+    "thursday": "Jue",
+    "friday": "Vie",
+    "saturday": "Sáb",
+    "sunday": "Dom"
+  },
+  "tenant_deletion": {
+    "title": "Empresa eliminada exitosamente",
+    "lead": "Toda la información asociada al tenant fue eliminada correctamente:",
+    "items": {
+      "users": "Usuarios removidos del sistema",
+      "roles": "Roles y permisos eliminados",
+      "personalization": "Parámetros de personalización borrados",
+      "branding": "Archivos de branding eliminados de S3",
+      "catalog": "Registros del catálogo asociados eliminados"
+    },
+    "redirecting": "Redirigiendo en {{seconds}} segundos…",
+    "button": "Ir al inicio de sesión",
+    "warning_lead": "Esta acción eliminará toda la empresa (tenant), incluyendo:",
+    "irreversible": "Esta acción es irreversible.",
+    "confirm": "¿Estás seguro de eliminar toda la empresa? Esta acción no se puede deshacer.",
+    "button_delete": "Eliminar empresa definitivamente",
+    "delete_title": "Eliminar empresa"
   }
 }

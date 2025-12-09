@@ -384,7 +384,7 @@
         const endTime = document.getElementById("blockEndTime").value || "23:59";
         const desc = document.getElementById("blockDesc").value || "";
         if (!startDate || !endDate) {
-          alert("Ingresa fechas de inicio y término");
+          alert("<%= t('resources.block.date_required', 'Ingresa fechas de inicio y término') %>");
           return;
         }
         const start = `${startDate}T${startTime}`;
@@ -394,7 +394,7 @@
           closeBlockModal();
           await loadResources();
         } catch (err) {
-          alert("Error bloqueando recurso: " + (err.message || "sin detalle"));
+          alert("<%= t('resources.block.error', 'Error bloqueando recurso') %>: " + (err.message || "<%= t('agenda.messages.no_detail', 'sin detalle') %>"));
         }
       });
     });
@@ -402,27 +402,27 @@
 
   <div id="blockModal" class="block-modal">
     <div class="modal-card">
-      <h6>Bloquear recurso: <span id="blockResourceName"></span></h6>
+      <h6><%= t('resources.block.title', 'Bloquear recurso') %>: <span id="blockResourceName"></span></h6>
       <form id="blockForm" class="mt-2 d-flex flex-column gap-2">
         <div class="d-flex gap-2">
           <div class="flex-fill">
-            <label class="form-label">Desde</label>
+            <label class="form-label"><%= t('agenda.form.from', 'Desde') %></label>
             <input type="date" id="blockStart" class="form-control">
             <input type="time" id="blockStartTime" class="form-control mt-1" value="00:00">
           </div>
           <div class="flex-fill">
-            <label class="form-label">Hasta</label>
+            <label class="form-label"><%= t('agenda.form.to', 'Hasta') %></label>
             <input type="date" id="blockEnd" class="form-control">
             <input type="time" id="blockEndTime" class="form-control mt-1" value="23:59">
           </div>
         </div>
         <div>
-          <label class="form-label">Descripción</label>
-          <textarea id="blockDesc" class="form-control" rows="2" placeholder="Motivo del bloqueo"></textarea>
+          <label class="form-label"><%= t('resources.block.description', 'Descripción') %></label>
+          <textarea id="blockDesc" class="form-control" rows="2" placeholder="<%= t('resources.block.reason_placeholder', 'Motivo del bloqueo') %>"></textarea>
         </div>
         <div class="d-flex justify-content-end gap-2">
-          <button class="btn btn-secondary btn-sm" id="blockCancel">Cancelar</button>
-          <button class="btn btn-primary btn-sm" type="submit">Confirmar bloqueo</button>
+          <button class="btn btn-secondary btn-sm" id="blockCancel"><%= t('common.cancel', 'Cancelar') %></button>
+          <button class="btn btn-primary btn-sm" type="submit"><%= t('resources.block.confirm', 'Confirmar bloqueo') %></button>
         </div>
       </form>
     </div>

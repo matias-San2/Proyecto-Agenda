@@ -278,7 +278,7 @@
                 </div>
               </div>
               <div id="resourceList" class="d-flex flex-column gap-2">
-                <div class="muted">Cargando recursos...</div>
+                <div class="muted"><%= t('resources.list.loading', 'Cargando recursos...') %></div>
               </div>
               <hr>
               <div class="d-flex flex-column gap-2">
@@ -375,15 +375,15 @@
                   <div class="row g-3 mt-1">
                     <div class="col-12 col-md-3">
                       <label class="form-label"><%= t('agenda.form.agendado', 'Agendado (opcional)') %></label>
-                      <input id="manualAgendado" type="text" class="form-control" placeholder="Persona/cliente">
+                      <input id="manualAgendado" type="text" class="form-control" placeholder="<%= t('agenda.placeholders.scheduled_for', 'Persona/cliente') %>">
                     </div>
                     <div class="col-12 col-md-3">
                       <label class="form-label"><%= t('agenda.form.worker', 'Trabajador asignado (opcional)') %></label>
-                      <input id="manualTrabajador" type="text" class="form-control" placeholder="Profesional">
+                      <input id="manualTrabajador" type="text" class="form-control" placeholder="<%= t('agenda.placeholders.worker', 'Profesional') %>">
                     </div>
                     <div class="col-12 col-md-6">
                       <label class="form-label"><%= t('agenda.form.description', 'Descripción (opcional)') %></label>
-                      <input id="manualDescription" type="text" class="form-control" placeholder="Notas de la reserva">
+                      <input id="manualDescription" type="text" class="form-control" placeholder="<%= t('agenda.placeholders.notes', 'Notas de la reserva') %>">
                     </div>
                   </div>
                 </div>
@@ -410,7 +410,66 @@
     let allResources = [];
     let resources = [];
     let selectedResource = null;
-    const weekdayNames = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
+    const weekdayNames = <%- JSON.stringify([
+      t('days_short.monday', 'Lun'),
+      t('days_short.tuesday', 'Mar'),
+      t('days_short.wednesday', 'Mié'),
+      t('days_short.thursday', 'Jue'),
+      t('days_short.friday', 'Vie'),
+      t('days_short.saturday', 'Sáb'),
+      t('days_short.sunday', 'Dom')
+    ]) %>;
+    const dayNames = weekdayNames;
+    const i18nText = <%- JSON.stringify({
+      loadingResources: t('resources.list.loading', 'Cargando recursos...'),
+      noResources: t('agenda.messages.no_resources', 'No hay recursos configurados.'),
+      noResourcesError: t('agenda.messages.no_resources_error', 'Error cargando recursos'),
+      resourceLabel: t('resources.labels.resource', 'recurso'),
+      noReservations: t('agenda.messages.no_reservations', 'Sin reservas para la fecha.'),
+      noAvailability: t('agenda.messages.no_availability', 'No hay disponibilidad para este día.'),
+      reserve: t('agenda.actions.reserve', 'Reservar'),
+      createReservationError: t('agenda.messages.create_error', 'Error creando reserva'),
+      selectResourceWeek: t('agenda.messages.select_resource_week', 'Selecciona un recurso y fecha para ver la semana.'),
+      blockedTitle: t('agenda.status.blocked', 'Bloqueado'),
+      reservationTitle: t('agenda.status.reservation', 'Reserva'),
+      statusBooked: t('agenda.status.booked', 'Reservado'),
+      statusCancelled: t('agenda.status.cancelled', 'Cancelada'),
+      statusUnknown: t('agenda.status.unknown', 'Reservado'),
+      agendadoLabel: t('agenda.form.agendado', 'Agendado (opcional)'),
+      workerLabel: t('agenda.form.worker', 'Trabajador asignado (opcional)'),
+      locationLabel: t('common.location', 'Ubicación'),
+      descriptionLabel: t('agenda.form.description', 'Descripción (opcional)'),
+      cancelLabel: t('common.cancel', 'Cancelar'),
+      saveLabel: t('common.save', 'Guardar'),
+      missingIdsError: t('agenda.messages.missing_ids', 'No se puede guardar descripción: falta PK/SK del evento'),
+      saveDescriptionError: t('agenda.messages.save_description_error', 'Error guardando descripción'),
+      cancelMissingIds: t('agenda.messages.cancel_missing_ids', 'No se puede cancelar: falta PK/SK del evento'),
+      cancelError: t('agenda.messages.cancel_error', 'Error cancelando'),
+      selectResource: t('agenda.messages.select_resource', 'Selecciona un recurso'),
+      selectResourceFirst: t('agenda.messages.select_resource_first', 'Selecciona un recurso primero'),
+      recurrentDaysMissing: t('agenda.messages.recurrent_days_missing', 'Selecciona al menos un día y horarios para recurrente'),
+      dateRangeRequired: t('agenda.messages.date_range_required', 'Completa fecha de inicio y término'),
+      dateRangeInvalid: t('agenda.messages.date_range_invalid', 'La fecha de término debe ser >= inicio'),
+      recurrentCreated: t('agenda.messages.recurrent_created', 'Reservas recurrentes creadas'),
+      conflictCancelled: t('agenda.messages.conflict_cancelled', 'Operación cancelada por conflicto'),
+      recurrentCreatedWithConflicts: t('agenda.messages.recurrent_created_with_conflicts', 'Reservas recurrentes creadas (conflictos ignorados)'),
+      requiredFields: t('agenda.messages.required_fields', 'Completa fecha, hora y duración'),
+      durationInvalid: t('agenda.messages.duration_invalid', 'La duración debe ser mayor que 0'),
+      created: t('agenda.messages.created', 'Reserva creada'),
+      conflictPrompt: t('agenda.messages.conflict_prompt', 'Conflicto en fechas: {{conflicts}}\\nSi aceptas se ignorarán las conflictivas y las demás se crearán.\\n¿Quieres continuar?'),
+      errorPrefix: t('common.error', 'Error'),
+      noDetail: t('agenda.messages.no_detail', 'sin detalle'),
+      endLabel: t('agenda.form.end', 'Hora término'),
+      weekInstruction: t('agenda.messages.week_instruction', 'Selecciona un recurso para ver la vista semanal.'),
+      cancelReservationConfirm: t('agenda.messages.cancel_booking_confirm', '¿Cancelar esta reserva?')
+    }) %>;
+    const bufferLabel = <%- JSON.stringify(t('agenda.form.buffer', 'Buffer (min)')) %>;
+    const currentLanguage = <%- JSON.stringify(lng || lang || 'es') %>;
+    const statusLabels = {
+      blocked: i18nText.blockedTitle,
+      cancelled: i18nText.statusCancelled,
+      booked: i18nText.statusBooked
+    };
 
     const isoDateInput = (d = new Date()) => d.toISOString().slice(0, 10);
 
@@ -445,7 +504,7 @@
       select.innerHTML = "";
 
       if (!resources.length) {
-        list.innerHTML = '<div class="muted">No hay recursos configurados.</div>';
+        list.innerHTML = `<div class="muted">${i18nText.noResources}</div>`;
         return;
       }
 
@@ -455,7 +514,7 @@
         pill.innerHTML = `
           <div class="d-flex flex-column">
             <strong>${r.name || r.resourceId}</strong>
-            <span class="muted">${r.type || "recurso"}</span>
+            <span class="muted">${r.type || i18nText.resourceLabel}</span>
           </div>
         `;
         pill.onclick = () => {
@@ -503,12 +562,13 @@
       const container = document.getElementById("reservationsList");
       container.innerHTML = "";
       if (!items.length) {
-        container.innerHTML = '<div class="muted">Sin reservas para la fecha.</div>';
+        container.innerHTML = `<div class="muted">${i18nText.noReservations}</div>`;
         return;
       }
       items.sort((a, b) => (a.start || "").localeCompare(b.start || ""));
       items.forEach((res) => {
         const statusClass = res.status === "blocked" ? "status-blocked" : res.status === "cancelled" ? "status-cancelled" : "status-booked";
+        const statusLabel = statusLabels[(res.status || "").toLowerCase()] || i18nText.statusUnknown;
         const div = document.createElement("div");
         div.className = "reservation";
         div.innerHTML = `
@@ -518,7 +578,7 @@
               <strong>${res.title || res.resourceId}</strong>
               <div class="muted">${new Date(res.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(res.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
             </div>
-            <span class="muted">${res.status || "booked"}</span>
+            <span class="muted">${statusLabel}</span>
           </div>
         `;
         container.appendChild(div);
@@ -529,7 +589,7 @@
       const container = document.getElementById("slotsList");
       container.innerHTML = "";
       if (!slots.length) {
-        container.innerHTML = '<div class="muted">No hay disponibilidad para este día.</div>';
+        container.innerHTML = `<div class="muted">${i18nText.noAvailability}</div>`;
         return;
       }
       slots.sort((a, b) => (a.start || "").localeCompare(b.start || ""));
@@ -542,7 +602,7 @@
           <span>${start} - ${end}</span>
           <div class="d-flex align-items-center">
             <span class="muted me-2">${slot.durationMinutes} min</span>
-            <% if (canWriteAgenda) { %><button class="btn btn-sm btn-success">Reservar</button><% } %>
+            <% if (canWriteAgenda) { %><button class="btn btn-sm btn-success">${i18nText.reserve}</button><% } %>
           </div>
         `;
         <% if (canWriteAgenda) { %>
@@ -556,7 +616,7 @@
             });
             await loadDayData();
           } catch (err) {
-            alert("Error creando reserva: " + err.message);
+            alert(i18nText.createReservationError + ": " + err.message);
           }
         };
         <% } %>
@@ -575,7 +635,7 @@
       const grid = document.getElementById("weeklyGrid");
       grid.innerHTML = "";
       if (!weekData || !weekData.days || !weekData.days.length) {
-        grid.innerHTML = '<div class="muted p-3">Selecciona un recurso y fecha para ver la semana.</div>';
+        grid.innerHTML = `<div class="muted p-3">${i18nText.selectResourceWeek}</div>`;
         return;
       }
 
@@ -647,25 +707,26 @@
           block.setAttribute("data-end", ev.end || "");
           block.setAttribute("data-meta", encodeURIComponent(JSON.stringify(ev)));
           const descText = ev.metadata?.description || ev.description || '';
-          const agendadoText = ev.metadata?.agendado || ev.metadata?.pacienteNombre || ev.metadata?.pacienteId || 'Sin dato';
+          const agendadoText = ev.metadata?.agendado || ev.metadata?.pacienteNombre || ev.metadata?.pacienteId || "<%= t('common.no_data', 'Sin datos') %>";
           const trabajadorText = ev.metadata?.trabajadorNombre || '—';
           const isBlocked = (ev.status || "").toLowerCase() === "blocked";
-          const title = isBlocked ? "Bloqueado" : (ev.title || "Reserva");
+          const title = isBlocked ? i18nText.blockedTitle : (ev.title || i18nText.reservationTitle);
+          const statusLabel = statusLabels[(ev.status || "").toLowerCase()] || i18nText.statusUnknown;
           block.innerHTML = `
             <div class="event-summary">
               <div class="small fw-bold">${title}</div>
               <div class="small">${new Date(ev.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(ev.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-              <div class="week-event-meta">${ev.status || 'booked'}</div>
+              <div class="week-event-meta">${statusLabel}</div>
             </div>
             <div class="event-details">
-              <div class="small">Agendado: ${agendadoText}</div>
-              <div class="small">Trabajador: ${trabajadorText}</div>
-              <div class="small">Ubicación: ${resources.find(r => r.resourceId === selectedResource)?.name || selectedResource}</div>
-              <label class="small mt-1 mb-1">Descripción</label>
+              <div class="small">${i18nText.agendadoLabel}: ${agendadoText}</div>
+              <div class="small">${i18nText.workerLabel}: ${trabajadorText}</div>
+              <div class="small">${i18nText.locationLabel}: ${resources.find(r => r.resourceId === selectedResource)?.name || selectedResource}</div>
+              <label class="small mt-1 mb-1">${i18nText.descriptionLabel}</label>
               <textarea class="form-control form-control-sm event-desc" rows="2" ${isBlocked ? "readonly" : ""}>${descText}</textarea>
               <div class="d-flex justify-content-between mt-2">
-                ${isBlocked ? "" : `<button type="button" class="btn btn-outline-danger btn-sm cancel-res" data-pk="${ev.PK || ''}" data-sk="${ev.SK || ''}">Cancelar</button>`}
-                <button type="button" class="btn btn-primary btn-sm save-desc" data-pk="${ev.PK || ''}" data-sk="${ev.SK || ''}">Guardar</button>
+                ${isBlocked ? "" : `<button type="button" class="btn btn-outline-danger btn-sm cancel-res" data-pk="${ev.PK || ''}" data-sk="${ev.SK || ''}">${i18nText.cancelLabel}</button>`}
+                <button type="button" class="btn btn-primary btn-sm save-desc" data-pk="${ev.PK || ''}" data-sk="${ev.SK || ''}">${i18nText.saveLabel}</button>
               </div>
             </div>
           `;
@@ -698,7 +759,7 @@
         allResources = data || [];
         applyResourceFilters();
       } catch (err) {
-        document.getElementById("resourceList").innerHTML = '<div class="muted">Error cargando recursos</div>';
+        document.getElementById("resourceList").innerHTML = `<div class="muted">${i18nText.noResourcesError}</div>`;
         console.error(err);
       }
     }
@@ -759,7 +820,7 @@
         const pk = btn.dataset.pk || "";
         const sk = btn.dataset.sk || "";
         if (!pk || !sk) {
-          alert("No se puede guardar descripción: falta PK/SK del evento");
+          alert(i18nText.missingIdsError);
           return;
         }
         try {
@@ -772,7 +833,7 @@
           await loadWeekData();
           await loadDayData();
         } catch (err) {
-          alert("Error guardando descripción: " + (err.message || "sin detalle"));
+          alert(i18nText.saveDescriptionError + ": " + (err.message || i18nText.noDetail));
         }
       });
 
@@ -783,10 +844,10 @@
         const pk = btn.dataset.pk || "";
         const sk = btn.dataset.sk || "";
         if (!pk || !sk) {
-          alert("No se puede cancelar: falta PK/SK del evento");
+          alert(i18nText.cancelMissingIds);
           return;
         }
-        const confirmado = confirm("¿Cancelar esta reserva?");
+        const confirmado = confirm(i18nText.cancelReservationConfirm);
         if (!confirmado) return;
         try {
           await apiPost("/scheduling/reservations/cancel", { PK: pk, SK: sk });
@@ -794,7 +855,7 @@
           await loadWeekData();
           await loadDayData();
         } catch (err) {
-          alert("Error cancelando: " + (err.message || "sin detalle"));
+          alert(i18nText.cancelError + ": " + (err.message || i18nText.noDetail));
         }
       });
     }
@@ -826,7 +887,7 @@
         const descripcion = (document.getElementById("manualDescription")?.value || "").trim();
 
         if (!resourceId) {
-          msg.textContent = "Selecciona un recurso";
+          msg.textContent = i18nText.selectResource;
           return;
         }
 
@@ -834,15 +895,15 @@
           if (mode === "recurrent") {
             const payload = buildRecurringPayload(resourceId);
             if (!payload.days.length) {
-              msg.textContent = "Selecciona al menos un día y horarios para recurrente";
+              msg.textContent = i18nText.recurrentDaysMissing;
               return;
             }
             if (!payload.periodStart || !payload.periodEnd) {
-              msg.textContent = "Completa fecha de inicio y término";
+              msg.textContent = i18nText.dateRangeRequired;
               return;
             }
             if (new Date(payload.periodEnd) < new Date(payload.periodStart)) {
-              msg.textContent = "La fecha de término debe ser >= inicio";
+              msg.textContent = i18nText.dateRangeInvalid;
               return;
             }
             if (descripcion) payload.metadata.description = descripcion;
@@ -850,31 +911,31 @@
             if (trabajador) payload.metadata.trabajadorNombre = trabajador;
             try {
               await apiPost("/scheduling/reservations/recurring", payload);
-              msg.textContent = "Reservas recurrentes creadas";
+              msg.textContent = i18nText.recurrentCreated;
             } catch (err) {
               if (err.status === 409 && err.data?.conflicts?.length) {
                 const lista = err.data.conflicts
                   .map(c => c.date || (c.start || '').slice(0,10))
                   .filter(Boolean)
                   .join(", ");
-                const ok = confirm(`Conflicto en fechas: ${lista}\nSi aceptas se ignorarán las conflictivas y las demás se crearán.\n¿Quieres continuar?`);
+                const ok = confirm(i18nText.conflictPrompt.replace("{{conflicts}}", lista));
                 if (!ok) {
-                  msg.textContent = "Operación cancelada por conflicto";
+                  msg.textContent = i18nText.conflictCancelled;
                   return;
                 }
                 await apiPost("/scheduling/reservations/recurring", { ...payload, confirmIgnoreConflicts: true });
-                msg.textContent = "Reservas recurrentes creadas (conflictos ignorados)";
+                msg.textContent = i18nText.recurrentCreatedWithConflicts;
               } else {
                 throw err;
               }
             }
           } else {
             if (!date || !time || !duration) {
-              msg.textContent = "Completa fecha, hora y duración";
+              msg.textContent = i18nText.requiredFields;
               return;
             }
             if (duration <= 0) {
-              msg.textContent = "La duración debe ser mayor que 0";
+              msg.textContent = i18nText.durationInvalid;
               return;
             }
             const startISO = `${date}T${time}`;
@@ -889,14 +950,14 @@
                 ...(descripcion ? { description: descripcion } : {})
               }
             });
-            msg.textContent = "Reserva creada";
+            msg.textContent = i18nText.created;
           }
           await loadDayData();
           // ocultar formulario al guardar
           const card = document.getElementById("manualFormCard");
           if (card) card.style.display = "none";
         } catch (err) {
-          msg.textContent = "Error: " + err.message;
+          msg.textContent = `${i18nText.errorPrefix}: ${err.message}`;
         }
       });
     }
@@ -971,11 +1032,11 @@
       div.className = "border rounded p-3 mt-2";
       div.innerHTML = `
         <h6>${weekdayNames[day]}</h6>
-        <label>Hora inicio</label>
+        <label><%= t('agenda.form.start', 'Hora inicio') %></label>
         <input type="time" class="form-control" id="start-${day}">
-        <label class="mt-2">Hora término</label>
+        <label class="mt-2">${i18nText.endLabel}</label>
         <input type="time" class="form-control" id="end-${day}">
-        <label class="mt-2">Buffer (min)</label>
+        <label class="mt-2">${bufferLabel}</label>
         <input type="number" class="form-control" id="buffer-${day}" value="5">
       `;
       container.appendChild(div);
@@ -994,7 +1055,7 @@
       if (!btn || !card) return;
       btn.addEventListener("click", () => {
         if (!selectedResource) {
-          alert("Selecciona un recurso primero");
+          alert(i18nText.selectResourceFirst);
           return;
         }
         const isHidden = card.style.display === "none" || card.style.display === "";
@@ -1045,7 +1106,7 @@
     }
 
     function formatDateLabel(date) {
-        return date.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        return date.toLocaleDateString(currentLanguage || undefined, { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
     async function renderWeeklyView() {
@@ -1054,7 +1115,7 @@
         if (!gridWrapper || !resourceSelect) return;
         const resourceId = resourceSelect.value;
         if (!resourceId) {
-            gridWrapper.innerHTML = '<p class="text-muted small mb-2">Selecciona un recurso para ver la vista semanal.</p>';
+            gridWrapper.innerHTML = `<p class="text-muted small mb-2">${i18nText.weekInstruction}</p>`;
             return;
         }
         if (!currentWeekStart) {
@@ -1101,11 +1162,10 @@
         emptyHeader.textContent = '';
         grid.appendChild(emptyHeader);
 
-        const dayNames = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
         days.forEach((d, idx) => {
             const hd = document.createElement('div');
             hd.className = 'week-grid-header';
-            const label = dayNames[idx] + ' ' + d.getDate().toString().padStart(2, '0');
+            const label = weekdayNames[idx] + ' ' + d.getDate().toString().padStart(2, '0');
             hd.textContent = label;
             grid.appendChild(hd);
         });

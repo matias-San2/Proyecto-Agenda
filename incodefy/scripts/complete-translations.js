@@ -46,7 +46,7 @@ const translations = {
       'Free': 'Libero', 'In Use': 'In uso', 'Waiting': 'In attesa', 'Disabled': 'Disabilitato',
       'No more appointments today': 'Non ci sono più consultazioni per oggi',
       'Corridor {{count}}': 'Corridoio {{count}}',
-      '© 2025 Incodefy. Medical Agenda System - All rights reserved.': '© 2025 Incodefy. Sistema di Agenda Medica - Tutti i diritti riservati.',
+      '© 2025 MASFI. Medical Agenda System - All rights reserved.': '© 2025 MASFI. Sistema di Agenda Medica - Tutti i diritti riservati.',
       'Login': 'Accedi', 'Email': 'Email', 'Password': 'Password',
       'Remember me': 'Ricordami', 'Forgot your password?': 'Password dimenticata?',
       'Show password': 'Mostra password',

@@ -1,14 +1,19 @@
 <% const brandingSource = (typeof personalization !== 'undefined' && personalization) ? personalization : (locals && locals.personalization ? locals.personalization : null); %>
 <% const branding = (brandingSource && brandingSource.branding) ? brandingSource.branding : {}; %>
+<% const brandName = (branding && branding.name) ? branding.name : 'MASFI'; %>
 <footer class="footer">
   <div class="footer-content">
     <!-- Brand/Logo Section -->
     <div class="footer-brand">
       <div class="logo-container">
         <div class="company-logo">
-          <img src="<%= branding.logo || '/logos/incodefy3.png' %>" class="brand-logo" alt="Logo Incodefy" />
+          <% if (branding && branding.logo) { %>
+            <img src="<%= branding.logo %>" class="brand-logo" alt="<%= brandName %> logo" />
+          <% } else { %>
+            <div class="brand-placeholder"><%= brandName %></div>
+          <% } %>
         </div>
-        <h2 class="company-name">Incodefy</h2>
+        <h2 class="company-name"><%= brandName %></h2>
       </div>
     </div>
   </div>

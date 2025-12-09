@@ -4,10 +4,10 @@
         <i class="fas fa-check"></i>
     </div>
     <div class="mensaje" id="notificacion-importacion-mensaje">
-        Importación completada exitosamente
+        <%= t('common.import_success', 'Importación completada exitosamente') %>
     </div>
     <button class="btn btn-sm ms-3" onclick="verDetallesImportacion()">
-        <i class="fas fa-eye me-1"></i>Ver detalles
+        <i class="fas fa-eye me-1"></i><%= t('common.view_details', 'Ver detalles') %>
     </button>
 </div>
 
@@ -17,56 +17,56 @@
         <div class="modal-content">
             <div class="modal-header bg-medical">
                 <h5 class="modal-title" id="detalleImportacionLabel">
-                    Detalles de la Importación
+                    <%= t('common.import_details', 'Detalles de la Importación') %>
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="<%= t('common.close', 'Cerrar') %>"></button>
             </div>
             <div class="modal-body">
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped align-middle mb-0">
-                        <caption class="visually-hidden">Detalles de la importación de consultas médicas</caption>
+                        <caption class="visually-hidden"><%= t('common.import_table_caption', 'Detalles de la importación de consultas médicas') %></caption>
                         <thead class="table-medical">
                             <tr>
                                 <th scope="col">
                                     <div class="th-content">
                                         <i class="fas fa-calendar me-2"></i>
-                                        <span>Fecha</span>
+                                        <span><%= t('common.date', 'Fecha') %></span>
                                     </div>
                                 </th>
                                 <th scope="col">
                                     <div class="th-content">
                                         <i class="fas fa-clock me-2"></i>
-                                        <span>Hora Inicio</span>
+                                        <span><%= t('common.start_time', 'Hora Inicio') %></span>
                                     </div>
                                 </th>
                                 <th scope="col">
                                     <div class="th-content">
                                         <i class="fas fa-clock me-2"></i>
-                                        <span>Hora Fin</span>
+                                        <span><%= t('common.end_time', 'Hora Fin') %></span>
                                     </div>
                                 </th>
                                 <th scope="col">
                                     <div class="th-content">
                                         <i class="fas fa-user-md me-2"></i>
-                                        <span>Médico</span>
+                                        <span><%= t('common.doctor', 'Médico') %></span>
                                     </div>
                                 </th>
                                 <th scope="col">
                                     <div class="th-content">
                                         <i class="fas fa-door-open me-2"></i>
-                                        <span>Box</span>
+                                        <span><%= t('common.box', 'Box') %></span>
                                     </div>
                                 </th>
                                 <th scope="col">
                                     <div class="th-content">
                                         <i class="fas fa-stethoscope me-2"></i>
-                                        <span>Tipo Consulta</span>
+                                        <span><%= t('common.consult_type', 'Tipo Consulta') %></span>
                                     </div>
                                 </th>
                                 <th scope="col">
                                     <div class="th-content">
                                         <i class="fas fa-info-circle me-2"></i>
-                                        <span>Estado</span>
+                                        <span><%= t('common.status', 'Estado') %></span>
                                     </div>
                                 </th>
                             </tr>

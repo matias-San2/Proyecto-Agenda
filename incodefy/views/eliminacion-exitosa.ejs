@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<%= lng || lang || 'es' %>">
 <head>
     <meta charset="UTF-8">
-    <title>Empresa eliminada</title>
+    <title><%= t('tenant_deletion.title', 'Empresa eliminada exitosamente') %></title>
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -67,26 +67,26 @@
                         <i class="fas fa-check-circle"></i>
                     </div>
 
-                    <h2 class="fw-bold mb-3">Empresa eliminada exitosamente</h2>
+                    <h2 class="fw-bold mb-3"><%= t('tenant_deletion.title', 'Empresa eliminada exitosamente') %></h2>
 
                     <p class="lead">
-                        Toda la información asociada al tenant fue eliminada correctamente:
+                        <%= t('tenant_deletion.lead', 'Toda la información asociada al tenant fue eliminada correctamente:') %>
                     </p>
 
                     <ul class="list-group text-start mb-4">
-                        <li class="list-group-item">✓ Usuarios removidos del sistema</li>
-                        <li class="list-group-item">✓ Roles y permisos eliminados</li>
-                        <li class="list-group-item">✓ Parámetros de personalización borrados</li>
-                        <li class="list-group-item">✓ Archivos de branding eliminados de S3</li>
-                        <li class="list-group-item">✓ Registros del catálogo asociados eliminados</li>
+                        <li class="list-group-item">✓ <%= t('tenant_deletion.items.users', 'Usuarios removidos del sistema') %></li>
+                        <li class="list-group-item">✓ <%= t('tenant_deletion.items.roles', 'Roles y permisos eliminados') %></li>
+                        <li class="list-group-item">✓ <%= t('tenant_deletion.items.personalization', 'Parámetros de personalización borrados') %></li>
+                        <li class="list-group-item">✓ <%= t('tenant_deletion.items.branding', 'Archivos de branding eliminados de S3') %></li>
+                        <li class="list-group-item">✓ <%= t('tenant_deletion.items.catalog', 'Registros del catálogo asociados eliminados') %></li>
                     </ul>
 
                     <div class="countdown mb-3">
-                        Redirigiendo en <span id="countdown">5</span> segundos…
+                        <span id="countdownMessage"><%= t('tenant_deletion.redirecting', 'Redirigiendo en {{seconds}} segundos…', { seconds: 5 }) %></span>
                     </div>
 
                     <a href="/logout" class="btn btn-primary btn-home">
-                        Ir al inicio de sesión
+                        <%= t('tenant_deletion.button', 'Ir al inicio de sesión') %>
                     </a>
                 </div>
 
@@ -101,12 +101,13 @@
     <script src="https://kit.fontawesome.com/a2e0e6ad65.js" crossorigin="anonymous"></script>
     <script>
       (function () {
-        const countdownEl = document.getElementById('countdown');
+        const countdownMsgEl = document.getElementById('countdownMessage');
+        const redirectTemplate = "<%= t('tenant_deletion.redirecting', 'Redirigiendo en {{seconds}} segundos…') %>";
         let counter = 5;
 
         const intervalId = setInterval(() => {
           counter -= 1;
-          if (countdownEl) countdownEl.textContent = counter;
+          if (countdownMsgEl) countdownMsgEl.textContent = redirectTemplate.replace('{{seconds}}', counter);
 
           if (counter <= 0) {
             clearInterval(intervalId);
