@@ -1,15 +1,15 @@
 version: 2
 updates:
-  # Mantener dependencias de npm actualizadas (incodefy)
+  # Mantener dependencias de npm actualizadas (MASFI)
   - package-ecosystem: "npm"
-    directory: "/incodefy"
+    directory: "/MASFI"
     schedule:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 5
     labels:
       - "dependencies"
-      - "incodefy"
+      - "MASFI"
 
   # Mantener dependencias de npm actualizadas (aws)
   - package-ecosystem: "npm"

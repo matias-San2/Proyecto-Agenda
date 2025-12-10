@@ -78,9 +78,9 @@ case $opcion in
     read -p "¿Quieres que abra la página de GitHub Actions? [s/n]: " abrir
     if [[ $abrir == "s" ]]; then
       echo "Abriendo GitHub Actions..."
-      xdg-open "https://github.com/Incodefy/Proyecto-Hospital-Padre-Hurtado/actions" 2>/dev/null || 
-      open "https://github.com/Incodefy/Proyecto-Hospital-Padre-Hurtado/actions" 2>/dev/null ||
-      start "https://github.com/Incodefy/Proyecto-Hospital-Padre-Hurtado/actions" 2>/dev/null
+      xdg-open "https://github.com/MASFI/Proyecto-Hospital-Padre-Hurtado/actions" 2>/dev/null || 
+      open "https://github.com/MASFI/Proyecto-Hospital-Padre-Hurtado/actions" 2>/dev/null ||
+      start "https://github.com/MASFI/Proyecto-Hospital-Padre-Hurtado/actions" 2>/dev/null
     fi
     ;;
 
@@ -197,14 +197,14 @@ case $opcion in
     echo ""
     echo "3. Crear base de datos:"
     echo "   sudo mysql"
-    echo "   CREATE DATABASE incodefy;"
+    echo "   CREATE DATABASE MASFI;"
     echo "   CREATE USER 'appuser'@'localhost' IDENTIFIED BY 'SecurePass123!';"
-    echo "   GRANT ALL PRIVILEGES ON incodefy.* TO 'appuser'@'localhost';"
+    echo "   GRANT ALL PRIVILEGES ON MASFI.* TO 'appuser'@'localhost';"
     echo "   FLUSH PRIVILEGES;"
     echo "   EXIT;"
     echo ""
     echo "4. Importar schema (si tienes uno):"
-    echo "   mysql -u appuser -p incodefy < schema.sql"
+    echo "   mysql -u appuser -p MASFI < schema.sql"
     echo ""
     echo "┌─────────────────────────────────────────────────────────────┐"
     echo "│  PASO 4: Configurar Variables de Entorno (10 min)          │"
@@ -219,7 +219,7 @@ case $opcion in
     echo "DB_HOST=localhost"
     echo "DB_USER=appuser"
     echo "DB_PASSWORD=SecurePass123!"
-    echo "DB_NAME=incodefy"
+    echo "DB_NAME=MASFI"
     echo "SESSION_SECRET=<tu_session_secret>"
     echo "USER_POOL_ID=us-east-1_d1nLNhiEF"
     echo "USER_POOL_CLIENT_ID=6b39m5lqu77hrhi4q94jpe9tku"
@@ -319,7 +319,7 @@ case $opcion in
     if [[ $continuar == "s" ]]; then
       echo ""
       echo "Instalando Jest..."
-      cd incodefy
+      cd MASFI
       npm install --save-dev jest supertest @types/jest
       
       echo ""

@@ -62,7 +62,7 @@ Proyecto-Hospital-Padre-Hurtado/
 │   │   └── codeql.yml             # Análisis de seguridad
 │   ├── dependabot.yml             # Actualizaciones automáticas
 │   └── pull_request_template.md
-├── incodefy/                      # Aplicación Node.js principal
+├── MASFI/                      # Aplicación Node.js principal
 │   ├── middleware/
 │   ├── public/
 │   ├── routes/
@@ -122,8 +122,8 @@ Proyecto-Hospital-Padre-Hurtado/
 git clone https://github.com/felivazpro/Proyecto-Hospital-Padre-Hurtado.git
 cd Proyecto-Hospital-Padre-Hurtado
 
-# Instalar dependencias (incodefy)
-cd incodefy
+# Instalar dependencias (MASFI)
+cd MASFI
 npm install
 
 # Configurar variables de entorno
@@ -147,7 +147,7 @@ La aplicación estará disponible en `http://localhost:3000`
 
 ### Variables de Entorno
 
-Crea un archivo `.env` en la carpeta `incodefy/` con:
+Crea un archivo `.env` en la carpeta `MASFI/` con:
 
 ```env
 NODE_ENV=development
@@ -158,7 +158,7 @@ SESSION_SECRET=tu-clave-secreta-super-segura
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=tu-password
-DB_NAME=incodefy
+DB_NAME=MASFI
 
 # AWS Cognito
 AWS_REGION=us-east-1
@@ -173,7 +173,7 @@ API_BASE_URL=https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com
 
 ## 📦 Scripts Disponibles
 
-### Incodefy (Aplicación principal)
+### MASFI (Aplicación principal)
 
 ```powershell
 npm start          # Iniciar servidor
@@ -290,7 +290,7 @@ Soporta múltiples idiomas:
 - 🇪🇸 Español
 - 🇬🇧 Inglés
 
-Agregar nuevos idiomas en `incodefy/locales/`
+Agregar nuevos idiomas en `MASFI/locales/`
 
 ## 🤝 Contribuir
 

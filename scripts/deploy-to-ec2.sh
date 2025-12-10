@@ -9,7 +9,7 @@ APP_NAME="hospital-app"
 echo "🚀 Iniciando deployment de Hospital Padre Hurtado..."
 
 # Ir al directorio de la aplicación
-cd $APP_DIR/incodefy || exit 1
+cd $APP_DIR/MASFI || exit 1
 
 # Hacer backup del .env (si existe)
 if [ -f ".env" ]; then

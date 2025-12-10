@@ -3,7 +3,7 @@
 # Script para crear el archivo .env en EC2
 # Ejecuta este script en tu EC2 ANTES del primer deployment
 
-ENV_FILE="/home/ubuntu/hospital-app/incodefy/.env"
+ENV_FILE="/home/ubuntu/hospital-app/MASFI/.env"
 
 echo "📝 Creando archivo .env para producción..."
 

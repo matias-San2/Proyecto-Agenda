@@ -15,7 +15,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 Pop-Location
 
-Push-Location incodefy
+Push-Location MASFI
 if (Test-Path "package.json") {
     npm run lint 2>$null
 }

@@ -7,7 +7,7 @@ const REGION = "us-east-1";
  const USER_ROLES_TABLE = "aws-cognito-jwt-login-dev-user-roles"; 
  // ¡Verifica que este sea el nombre exacto de tu tabla!
 
-const SUPER_ADMIN_USER = { user_email: "admin@incodefy.com", // El email de tu usuario en Cognito 
+const SUPER_ADMIN_USER = { user_email: "admin@MASFI.com", // El email de tu usuario en Cognito 
                             role: "admin",
                             empresaId: "HOSPITAL_01", // El ID de tu primera "empresa" 
                             assigned_at: new Date().toISOString(),

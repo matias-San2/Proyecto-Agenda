@@ -12,7 +12,7 @@
 
 ### 1. GitHub Actions (Ahora Mismo)
 
-Ve a: https://github.com/Incodefy/Proyecto-Hospital-Padre-Hurtado/actions
+Ve a: https://github.com/MASFI/Proyecto-Hospital-Padre-Hurtado/actions
 
 Deberías ver:
 - ✅ **CI Pipeline** ejecutándose o completado
@@ -139,7 +139,7 @@ npm run deploy:staging
 
 # Opción 2: Desde GitHub Actions
 ```
-1. Ve a: https://github.com/Incodefy/Proyecto-Hospital-Padre-Hurtado/actions
+1. Ve a: https://github.com/MASFI/Proyecto-Hospital-Padre-Hurtado/actions
 2. Click en "CD Pipeline"
 3. Click en "Run workflow"
 4. Selecciona "staging"
@@ -155,7 +155,7 @@ npm run deploy:prod
 
 # Opción 2: Desde GitHub Actions
 ```
-1. Ve a: https://github.com/Incodefy/Proyecto-Hospital-Padre-Hurtado/actions
+1. Ve a: https://github.com/MASFI/Proyecto-Hospital-Padre-Hurtado/actions
 2. Click en "CD Pipeline"
 3. Click en "Run workflow"
 4. Selecciona "production"
@@ -214,7 +214,7 @@ aws logs tail /aws/lambda/aws-cognito-jwt-login-dev-health \
 
 ### GitHub Actions
 Mantén un ojo en:
-- https://github.com/Incodefy/Proyecto-Hospital-Padre-Hurtado/actions
+- https://github.com/MASFI/Proyecto-Hospital-Padre-Hurtado/actions
 
 Para ver el historial de deployments y su estado.
 
@@ -307,4 +307,4 @@ Has implementado exitosamente un pipeline completo de CI/CD para tu proyecto Hos
 
 **Siguiente paso**: Ve a GitHub Actions y observa tu primer deployment automático! 🚀
 
-https://github.com/Incodefy/Proyecto-Hospital-Padre-Hurtado/actions
+https://github.com/MASFI/Proyecto-Hospital-Padre-Hurtado/actions

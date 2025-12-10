@@ -87,7 +87,7 @@ Proyecto-Hospital-Padre-Hurtado/
 │   ├── src/handlers/       # Lambda functions
 │   ├── serverless.yml      # Configuración de infraestructura
 │   └── package.json
-└── incodefy/               # Frontend Express
+└── MASFI/               # Frontend Express
     ├── routes/
     ├── views/
     ├── server.js
@@ -107,7 +107,7 @@ npm run validate         # Validar configuración
 npm run lint             # Linting
 
 # Frontend
-cd incodefy
+cd MASFI
 npm install
 npm start                # Servidor Express local
 ```
